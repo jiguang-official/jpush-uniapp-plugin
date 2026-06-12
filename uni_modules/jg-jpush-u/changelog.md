@@ -1,7 +1,5 @@
-## 1.2.7 (2026-06-12)
-
+## 1.2.7（2026-06-12）
 HarmonyOS JPush SDK 升级至 1.4.0：鸿蒙新增 getPushStatus、setContext 接口，getRegistrationId/isPushStopped 改为异步返回 Promise，setClickWant 支持冷启动传入 context
-
 ## 1.2.6 (2026-05-15)
 Android/iOS JPush SDK 升级至 6.1.0，新增 setKeepLongConnInBackground 及 VOIP 消息回调，更新厂商推送 SDK 版本
 ## 1.2.5（2026-05-13）
