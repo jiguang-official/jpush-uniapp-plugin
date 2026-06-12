@@ -1,3 +1,5 @@
+## 1.2.8（2026-06-12）
+鸿蒙 setUserRequestNotificationPermission 适配 SDK 新签名，内部传入 applicationContext
 ## 1.2.7（2026-06-12）
 HarmonyOS JPush SDK 升级至 1.4.0：鸿蒙新增 getPushStatus、setContext 接口，getRegistrationId/isPushStopped 改为异步返回 Promise，setClickWant 支持冷启动传入 context
 ## 1.2.6 (2026-05-15)

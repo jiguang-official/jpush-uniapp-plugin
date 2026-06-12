@@ -111,7 +111,7 @@ export const setChannel = function (channel : string) {
 // 配置用户通知权限申请方式
 export const setUserRequestNotificationPermission = function (enable : boolean) : void {
 	console.log(TAG, "setUserRequestNotificationPermission:" + enable)
-	JPushInterface.setUserRequestNotificationPermission(enable)
+	JPushInterface.setUserRequestNotificationPermission(getContext(), enable)
 }
 
 // 设置用户分群推送开关
