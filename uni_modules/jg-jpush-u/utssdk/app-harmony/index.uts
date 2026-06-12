@@ -36,7 +36,8 @@ function handleSetClickWant(want : Want) : void {
 	// 如果已经初始化，直接调用setClickWant
 	if (IS_INIT && undefined !== APP_KEY) {
 		console.log(TAG, "handleSetClickWant: calling setClickWant")
-		JPushInterface.setClickWant(want);
+		// 冷启动点击通知场景传入 context，避免 SDK 内部 context 未初始化异常（v1.4.0）
+		JPushInterface.setClickWant(want, getContext());
 	} else {
 		// 如果还没有初始化，保存到数组
 		MY_WANT_ARRAY.push(want)
@@ -50,7 +51,7 @@ function processSavedWants() : void {
 		console.log(TAG, "processSavedWants: processing " + MY_WANT_ARRAY.length + " saved wants")
 		MY_WANT_ARRAY.forEach((want) => {
 			console.log(TAG, "processSavedWants: calling setClickWant")
-			JPushInterface.setClickWant(want);
+			JPushInterface.setClickWant(want, getContext());
 		})
 		MY_WANT_ARRAY = []
 	}
@@ -141,7 +142,8 @@ export const init = function (context : common.UIAbilityContext | common.Ability
 	}
 }
 
-export const getRegistrationId = function () : string {
+// v1.4.0 起 SDK 改为异步返回，调用处需 await
+export const getRegistrationId = function () : Promise<string> {
 	return JPushInterface.getRegistrationId();
 }
 
@@ -159,8 +161,23 @@ export const resumePush = function () {
 	JPushInterface.resumePush();
 }
 
-export const isPushStopped = function () : boolean | undefined {
+/**
+ * @deprecated 返回本地缓存状态，v1.4.0 起建议使用 getPushStatus 查询后台实际状态
+ */
+export const isPushStopped = function () : Promise<boolean | undefined> {
 	return JPushInterface.isPushStopped();
+}
+
+// 查询后台实际推送状态，结果通过 onCommandResult 事件回调返回
+export const getPushStatus = function () : void {
+	console.log(TAG, "getPushStatus")
+	JPushInterface.getPushStatus();
+}
+
+// 设置应用上下文，适用于 init 之前需要提前传入 context 的场景
+export const setContext = function (context ?: common.ApplicationContext) : void {
+	console.log(TAG, "setContext")
+	JPushInterface.setContext(context ?? getContext())
 }
 
 
@@ -200,8 +217,8 @@ export const setBadgeNumber = function (badgeNumber : number) {
 }
 
 
-export const setClickWant = function (want : Want) : Promise<JMessage | undefined> {
-	return JPushInterface.setClickWant(want);
+export const setClickWant = function (want : Want, context ?: common.ApplicationContext) : Promise<JMessage | undefined> {
+	return JPushInterface.setClickWant(want, context);
 }
 
 

@@ -2,7 +2,7 @@ import AbilityStage from '@ohos.app.ability.AbilityStage';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { bundleManager } from '@kit.AbilityKit';
 
-import { setChannel, setAppKey, setDebug,setCustomMessageMaxCacheCount } from '@uni_modules/jg-jpush-u';
+import { setChannel, setAppKey, setDebug,setCustomMessageMaxCacheCount, setContext } from '@uni_modules/jg-jpush-u';
 
 const TAG: string = 'JPUSH-JLog-JGPushAbilityStage'
 
@@ -11,6 +11,9 @@ export default class JGPushAbilityStage extends AbilityStage {
   onCreate() {
     // 应用的HAP在首次加载的时，为该Module初始化操作
     hilog.info(0x0000, TAG, '%{public}s', 'JGPushAbilityStage onCreate');
+
+    // v1.4.0：init 之前提前设置应用上下文，避免冷启动点击通知等场景 SDK 内部 context 未初始化
+    setContext(this.context.getApplicationContext())
 
     let appKey = this.getMetadata("JG_APP_KEY");
     let debug = this.getMetadata("JG_DEBUG_MODE");
