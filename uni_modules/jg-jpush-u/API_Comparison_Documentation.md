@@ -39,7 +39,7 @@
 |------|-----|---------|-----------|------|
 | 停止推送 | - | `stopPush()` | `stopPush()` | iOS不支持 |
 | 恢复推送 | - | `resumePush()` | `resumePush()` | iOS不支持 |
-| 检查推送状态 | - | `isPushStopped(): boolean` | `isPushStopped(): boolean \| undefined` | iOS不支持 |
+| 检查推送状态 | - | `isPushStopped(): boolean` | `isPushStopped(): boolean` | iOS不支持，Android/HarmonyOS一致 |
 
 ### 4. 标签管理
 

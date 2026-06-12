@@ -18,6 +18,17 @@ import {
 
 const TAG = "JPUSH-uni-CallBackMsg-"
 
+// RID 缓存：注册回调时更新，供 index.uts 的 getRegistrationId 同步返回
+let CACHED_RID : string = ""
+
+export function setCachedRid(rid : string) : void {
+	CACHED_RID = rid
+}
+
+export function getCachedRid() : string {
+	return CACHED_RID
+}
+
 export class CallBackMsgUni extends CallBackMsg {
 
 	callback : EventCallBackParams
@@ -33,6 +44,7 @@ export class CallBackMsgUni extends CallBackMsg {
 	 */
 	onRegister(registrationId : string) : void {
 		console.log(TAG, 'onRegister registrationId:' + registrationId);
+		setCachedRid(registrationId)
 		let v : EventCallBack = { "eventName": "onRegister", "eventData": registrationId };
 		this.callback.callback?.(v);
 	}

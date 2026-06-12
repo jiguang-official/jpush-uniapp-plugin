@@ -7,7 +7,7 @@ import { EventCallBackParams } from '../interface.uts';
 
 
 
-import { CallBackMsgUni } from './callback.uts';
+import { CallBackMsgUni, getCachedRid, setCachedRid } from './callback.uts';
 
 
 
@@ -135,16 +135,29 @@ export const init = function (context : common.UIAbilityContext | common.Ability
 	console.log(TAG, "init")
 	JPushInterface.init(context)
 	IS_INIT = true
-	
+	refreshCachedRid()
+	refreshCachedPushStopped()
+
 	// 如果已经设置了APP_KEY，处理所有保存的want
 	if (undefined !== APP_KEY) {
 		processSavedWants()
 	}
 }
 
-// v1.4.0 起 SDK 改为异步返回，调用处需 await
-export const getRegistrationId = function () : Promise<string> {
-	return JPushInterface.getRegistrationId();
+// 异步刷新 RID 缓存，注册成功的 onRegister 回调也会更新缓存（见 callback.uts）
+function refreshCachedRid() : void {
+	JPushInterface.getRegistrationId().then((rid : string) => {
+		if (rid.length > 0) {
+			setCachedRid(rid)
+		}
+	})
+}
+
+// v1.4.0 起底层 SDK 改为异步返回，这里通过缓存保持与 Android/iOS 一致的同步返回；
+// 注册完成前可能返回空字符串
+export const getRegistrationId = function () : string {
+	refreshCachedRid()
+	return getCachedRid()
 }
 
 export const setCustomMessageMaxCacheCount = function (maxCacheCount : number) {
@@ -154,18 +167,34 @@ export const setCustomMessageMaxCacheCount = function (maxCacheCount : number) {
 
 export const stopPush = function () {
 	JPushInterface.stopPush();
+	refreshCachedPushStopped()
 }
 
 
 export const resumePush = function () {
 	JPushInterface.resumePush();
+	refreshCachedPushStopped()
+}
+
+// 推送停止状态缓存，使 isPushStopped 保持与 Android 一致的同步返回
+let CACHED_PUSH_STOPPED : boolean = false
+
+// 异步刷新推送停止状态缓存
+function refreshCachedPushStopped() : void {
+	JPushInterface.isPushStopped().then((stopped : boolean | undefined) => {
+		if (undefined !== stopped) {
+			CACHED_PUSH_STOPPED = stopped
+		}
+	})
 }
 
 /**
- * @deprecated 返回本地缓存状态，v1.4.0 起建议使用 getPushStatus 查询后台实际状态
+ * 返回本地缓存状态；v1.4.0 起底层 SDK 改为异步返回，这里通过缓存保持同步返回
+ * @deprecated 建议使用 getPushStatus 查询后台实际状态
  */
-export const isPushStopped = function () : Promise<boolean | undefined> {
-	return JPushInterface.isPushStopped();
+export const isPushStopped = function () : boolean {
+	refreshCachedPushStopped()
+	return CACHED_PUSH_STOPPED
 }
 
 // 查询后台实际推送状态，结果通过 onCommandResult 事件回调返回

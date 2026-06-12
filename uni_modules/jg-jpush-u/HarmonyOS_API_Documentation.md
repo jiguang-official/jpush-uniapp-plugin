@@ -120,7 +120,7 @@ init(customContext)  // 使用自定义上下文
 获取设备的RegistrationID
 
 **返回值：**
-- `string`: 设备的唯一标识符
+- `string`: 设备的唯一标识符；注册尚未完成时返回空字符串，可通过 `onRegister` 事件回调获取注册结果
 
 **示例：**
 ```typescript
@@ -157,11 +157,11 @@ stopPush()
 resumePush()
 ```
 
-#### isPushStopped(): boolean | undefined
-检查推送服务是否已停止
+#### isPushStopped(): boolean
+检查推送服务是否已停止（返回本地缓存状态，建议使用 `getPushStatus` 查询后台实际状态）
 
 **返回值：**
-- `boolean | undefined`: 推送服务状态
+- `boolean`: 推送服务是否已停止
 
 **示例：**
 ```typescript
