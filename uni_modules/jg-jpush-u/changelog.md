@@ -1,3 +1,5 @@
+## 1.2.9（2026-06-12）
+鸿蒙 getRegistrationId/isPushStopped 恢复与 Android 一致的同步返回（内部缓存底层异步结果），注册完成前 getRegistrationId 可能返回空字符串
 ## 1.2.8（2026-06-12）
 鸿蒙 setUserRequestNotificationPermission 适配 SDK 新签名，内部传入 applicationContext
 ## 1.2.7（2026-06-12）
