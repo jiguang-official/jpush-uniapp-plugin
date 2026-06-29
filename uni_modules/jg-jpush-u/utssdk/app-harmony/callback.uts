@@ -120,6 +120,28 @@ export class CallBackMsgUni extends CallBackMsg {
 	}
 
 	/**
+	 * 通知送达回调（通知到达设备时触发）
+	 * 事件名 onNotifyMessageArrived 与 Android/iOS 对齐
+	 * @param jMessage
+	 */
+	onArrivedMessage(jMessage : JMessage) {
+		console.log(TAG, 'onArrivedMessage jMessage:' + JSON.stringify(jMessage));
+		let v : EventCallBack = { "eventName": "onNotifyMessageArrived", "eventData": JSON.stringify(jMessage) };
+		this.callback.callback?.(v);
+	}
+
+	/**
+	 * 通知未展示回调
+	 * 事件名 onNotifyMessageUnShow 与 Android 对齐
+	 * @param jMessage
+	 */
+	onUnShowMessage(jMessage : JMessage) {
+		console.log(TAG, 'onUnShowMessage jMessage:' + JSON.stringify(jMessage));
+		let v : EventCallBack = { "eventName": "onNotifyMessageUnShow", "eventData": JSON.stringify(jMessage) };
+		this.callback.callback?.(v);
+	}
+
+	/**
 	 * 自定义信息通知回调
 	 *  回调一：冷启动调用sdk初始化后回调之前还没有回调的信息
 	 *  回调二：app存活时会直接回调信息

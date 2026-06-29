@@ -114,6 +114,17 @@ init()  // 使用默认上下文
 init(customContext)  // 使用自定义上下文
 ```
 
+#### setContext(context?: common.ApplicationContext)
+设置应用上下文，适用于 init 之前需要提前传入 context 的场景（如冷启动点击通知）
+
+**参数：**
+- `context`: common.ApplicationContext | undefined - 应用上下文（可选，默认取当前 UIAbility 的 applicationContext）
+
+**示例：**
+```typescript
+setContext(this.context.getApplicationContext())
+```
+
 ### 2. 设备标识管理
 
 #### getRegistrationId(): string
@@ -167,6 +178,16 @@ resumePush()
 ```typescript
 const isStopped = isPushStopped()
 console.log('推送服务状态:', isStopped)
+```
+
+#### getPushStatus()
+查询后台实际推送状态，结果通过 `onCommandResult` 事件回调返回
+
+**回调事件：** `onCommandResult`
+
+**示例：**
+```typescript
+getPushStatus()
 ```
 
 ### 4. 标签管理
@@ -359,11 +380,12 @@ clearNotificationAll()
 
 ### 9. 消息处理
 
-#### setClickWant(want: Want): Promise<JMessage | undefined>
+#### setClickWant(want: Want, context?: common.ApplicationContext): Promise<JMessage | undefined>
 设置点击通知时的Want对象
 
 **参数：**
 - `want`: Want - 通知点击时的Want对象
+- `context`: common.ApplicationContext | undefined - 应用上下文（可选，冷启动点击通知场景建议传入，避免 SDK 内部 context 未初始化）
 
 **返回值：**
 - `Promise<JMessage | undefined>`: 消息对象
@@ -589,7 +611,31 @@ setEnableAppTerminate(true)
 }
 ```
 
-### 5. onTagOperatorResult
+### 5. onNotifyMessageArrived
+通知到达设备时触发（事件名与 Android/iOS 一致）
+
+**回调数据格式：**
+```json
+{
+    "eventName": "onNotifyMessageArrived",
+    "eventData": "JMessage对象的JSON字符串"
+}
+```
+
+> `eventData` 为 JMessage 对象，结构同 `onClickMessage`（见上）。
+
+### 6. onNotifyMessageUnShow
+通知未展示时触发（事件名与 Android 一致）
+
+**回调数据格式：**
+```json
+{
+    "eventName": "onNotifyMessageUnShow",
+    "eventData": "JMessage对象的JSON字符串"
+}
+```
+
+### 7. onTagOperatorResult
 标签操作结果回调
 
 **回调数据格式：**
@@ -613,7 +659,7 @@ setEnableAppTerminate(true)
 }
 ```
 
-### 6. onAliasOperatorResult
+### 8. onAliasOperatorResult
 别名操作结果回调
 
 **回调数据格式：**
@@ -637,7 +683,7 @@ setEnableAppTerminate(true)
 }
 ```
 
-### 7. onMobileNumberOperatorResult
+### 9. onMobileNumberOperatorResult
 手机号码操作结果回调
 
 **回调数据格式：**
@@ -658,7 +704,7 @@ setEnableAppTerminate(true)
 }
 ```
 
-### 8. onJMessageExtra
+### 10. onJMessageExtra
 通知扩展消息回调
 
 **回调数据格式：**
@@ -680,7 +726,7 @@ setEnableAppTerminate(true)
 }
 ```
 
-### 9. onJMessageVoIP
+### 11. onJMessageVoIP
 VoIP呼叫消息回调
 
 **回调数据格式：**
@@ -699,7 +745,7 @@ VoIP呼叫消息回调
 }
 ```
 
-### 10. onCommandResult
+### 12. onCommandResult
 交互事件回调
 
 **回调数据格式：**
@@ -740,6 +786,12 @@ setEventCallBack({
                 break
             case 'onClickMessage':
                 console.log('点击通知:', event.eventData)
+                break
+            case 'onNotifyMessageArrived':
+                console.log('通知送达:', event.eventData)
+                break
+            case 'onNotifyMessageUnShow':
+                console.log('通知未展示:', event.eventData)
                 break
             case 'onTagOperatorResult':
                 console.log('标签操作结果:', event.eventData)

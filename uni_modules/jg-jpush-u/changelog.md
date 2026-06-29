@@ -1,3 +1,5 @@
+## 1.3.0（2026-06-29）
+鸿蒙补充通知送达回调 onNotifyMessageArrived 与通知未展示回调 onNotifyMessageUnShow（事件名与 Android/iOS 对齐），修复极光通道收到通知不触发送达回调的问题
 ## 1.2.9（2026-06-12）
 鸿蒙 getRegistrationId/isPushStopped 恢复与 Android 一致的同步返回（内部缓存底层异步结果），注册完成前 getRegistrationId 可能返回空字符串
 ## 1.2.8（2026-06-12）

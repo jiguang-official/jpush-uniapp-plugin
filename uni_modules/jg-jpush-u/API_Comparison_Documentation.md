@@ -144,7 +144,7 @@
 |----------|-----|---------|-----------|------|
 | 自定义消息 | `onCustomMessage` | `onCustomMessage` | `onCustomMessage` | 三个平台一致 |
 | 连接状态 | `onConnected` | `onConnected` | `onConnected` | 三个平台一致 |
-| 收到通知 | `onNotifyMessageArrived` | `onNotifyMessageArrived` | - | HarmonyOS不支持 |
+| 收到通知 | `onNotifyMessageArrived` | `onNotifyMessageArrived` | `onNotifyMessageArrived` | 三个平台一致 |
 | 点击通知 | `onClickMessage` | `onClickMessage` | `onClickMessage` | 三个平台一致 |
 | 通知被清除 | `onNotifyMessageDismiss` | `onNotifyMessageDismiss` | - | HarmonyOS不支持 |
 | 设备注册 | - | `onRegister` | `onRegister` | iOS不支持 |
@@ -155,7 +155,7 @@
 | 手机号码操作结果 | `onMobileNumberOperatorResult` | `onMobileNumberOperatorResult` | `onMobileNumberOperatorResult` | 三个平台一致 |
 | 属性操作结果 | - | `onPropertyOperatorResult` | - | 仅Android支持 |
 | 通知设置检查 | - | `onNotificationSettingsCheck` | - | 仅Android支持 |
-| 通知未显示 | - | `onNotifyMessageUnShow` | - | 仅Android支持 |
+| 通知未显示 | - | `onNotifyMessageUnShow` | `onNotifyMessageUnShow` | Android/HarmonyOS支持 |
 | 应用内消息展示 | - | `onInAppMessageShow` | - | 仅Android支持 |
 | 应用内消息点击 | - | `onInAppMessageClick` | - | 仅Android支持 |
 | 地理围栏列表 | - | `onGeofenceReceived` | - | 仅Android支持 |
