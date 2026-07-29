@@ -6,7 +6,7 @@
   "keywords": [
     "jg-jpush-u"
 ],
-  "repository": "https://github.com/jiguang-official/jpush-harmony-uniapp-plugin",
+  "repository": "https://github.com/jiguang-official/jpush-uniapp-plugin",
   "engines": {
     "HBuilderX": "^3.6.8",
     "uni-app": "^4.75",
@@ -79,7 +79,8 @@
             "jd": "-",
             "harmony": "-",
             "qq": "-",
-            "lark": "-"
+            "lark": "-",
+            "xhs": "-"
           },
           "quickapp": {
             "huawei": "-",
