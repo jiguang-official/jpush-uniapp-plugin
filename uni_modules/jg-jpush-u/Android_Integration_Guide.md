@@ -73,6 +73,8 @@
 - **FCM推送**: [jg-jpush-u-fcm 配置文档](../jg-jpush-u-fcm/readme.md)
 - **蔚来推送**: [jg-jpush-u-nio 配置文档](../jg-jpush-u-nio/readme.md)
 
+> JPush Android SDK 6.1.0 起官方已停止支持蔚来推送 SDK。`jg-jpush-u-nio` 仅为兼容历史项目保留，不参与 6.2.0 厂商通道升级。
+
 ## 3. 代码集成
 
 ### 3.1 引入插件
@@ -170,6 +172,18 @@ setAlias(2, "user123")
 setMobileNumber(3, "13800138000")
 ```
 
+### 3.5 小米订阅消息
+
+JPush Android SDK 6.2.0 新增小米订阅消息能力。仅已集成并注册小米通道的小米设备支持：
+
+```typescript
+import { requestSubscribeChannel } from "@/uni_modules/jg-jpush-u"
+
+requestSubscribeChannel(["your_channel_id"])
+```
+
+单次最多传入 3 个小米订阅类 channelId。结果通过统一事件回调的 `onCommandResult` 返回，其中 `cmd` 为 `2012`。
+
 
 
 ## 4. 版本兼容性
@@ -182,4 +196,4 @@ setMobileNumber(3, "13800138000")
 
 - [极光推送官方文档](https://docs.jiguang.cn/jpush/)
 - [uni-app官方文档](https://uniapp.dcloud.net.cn/)
-- [Android开发文档](https://developer.android.com/) 
+- [Android开发文档](https://developer.android.com/)

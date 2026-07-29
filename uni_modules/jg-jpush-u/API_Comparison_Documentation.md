@@ -82,6 +82,7 @@
 | 清除所有通知 | - | `clearNotificationAll()` | `clearNotificationAll()` | iOS不支持 |
 | 根据ID清除通知 | - | `clearNotificationById(notificationId: Int)` | `clearNotificationById(id: number)` | iOS不支持 |
 | 根据消息ID清除通知 | - | - | `clearNotificationByMsgId(msgId: string)` | 仅HarmonyOS支持 |
+| 请求小米订阅消息渠道 | - | `requestSubscribeChannel(channelIds: string[])` | - | 仅Android小米通道支持，结果通过 `onCommandResult(cmd=2012)` 返回 |
 
 ### 9. 生命周期管理
 
@@ -200,4 +201,4 @@
 2. **Android**: 功能最全面，支持完整的生命周期管理和丰富的回调事件
 3. **HarmonyOS**: 功能最丰富，支持高级消息处理、数据分析和异步操作
 
-开发者可以根据具体需求选择合适的平台，或通过统一封装实现跨平台兼容。建议在开发初期就确定目标平台，以便充分利用各平台的特色功能。 
+开发者可以根据具体需求选择合适的平台，或通过统一封装实现跨平台兼容。建议在开发初期就确定目标平台，以便充分利用各平台的特色功能。

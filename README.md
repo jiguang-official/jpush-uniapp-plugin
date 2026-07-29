@@ -12,7 +12,7 @@
 - [jg-jpush-u-honor 荣耀推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-honor)
 - [jg-jpush-u-huawei 华为推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-huawei)
 - [jg-jpush-u-meizu 魅族推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-meizu)
-- [jg-jpush-u-nio 蔚来推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-nio)
+- [jg-jpush-u-nio 蔚来推送（历史兼容，官方已停止更新）](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-nio)
 - [jg-jpush-u-oppo OPPO推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-oppo)
 - [jg-jpush-u-vivo VIVO推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-vivo)
 - [jg-jpush-u-xiaomi 小米推送](https://ext.dcloud.net.cn/plugin?name=jg-jpush-u-xiaomi)
@@ -42,4 +42,4 @@
 
 - [极光推送官方文档](https://docs.jiguang.cn/jpush/)
 - [uni-app官方文档](https://uniapp.dcloud.net.cn/)
-- [Android开发文档](https://developer.android.com/) 
+- [Android开发文档](https://developer.android.com/)

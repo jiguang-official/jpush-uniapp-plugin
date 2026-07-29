@@ -6,8 +6,8 @@
 
 ## 前置条件
 
-- Xcode 12.0+
-- iOS 9.0+
+- Xcode 14.0+
+- iOS 12.0+
 - uni-app项目
 - 极光推送开发者账号
 - Apple Developer账号

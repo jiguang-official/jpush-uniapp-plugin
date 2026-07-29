@@ -1,6 +1,7 @@
 import JPushInterface from 'cn.jpush.android.api.JPushInterface'
 import JCoreInterface from 'cn.jiguang.api.JCoreInterface'
 import JPushConfig from 'cn.jpush.android.data.JPushConfig'
+import ArrayList from 'java.util.ArrayList'
 
 export * from './PushMessageReceiver.uts'
 export { PushService } from "./PushService.uts"
@@ -281,6 +282,20 @@ export const setCountryCode = function (code:string) {
 export const setKeepLongConnInBackground = function (keep : boolean) {
 	console.log(TAG, "setKeepLongConnInBackground", keep)
 	JPushInterface.setKeepLongConnInBackground(UTSAndroid.getAppContext(), keep)
+}
+
+/**
+ * 请求订阅小米推送消息渠道。
+ * 仅已集成并注册小米通道的小米设备支持，单次最多处理 3 个 channelId。
+ * 调用结果通过 onCommandResult 回调返回，cmd 为 2012。
+ */
+export const requestSubscribeChannel = function (channelIds : string[]) {
+	console.log(TAG, "requestSubscribeChannel", channelIds)
+	const channels = new ArrayList<string>()
+	for (let i = 0; i < channelIds.length; i++) {
+		channels.add(channelIds[i])
+	}
+	JPushInterface.requestSubscribeChannel(UTSAndroid.getAppContext(), channels)
 }
 
 @UTSJS.keepAlive

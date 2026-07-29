@@ -435,6 +435,27 @@ setGeofenceEnable(true)
 setDataInsightsEnable(true)
 ```
 
+### 12. 小米订阅消息
+
+#### requestSubscribeChannel(channelIds: string[])
+
+请求订阅小米推送消息渠道，开始支持的版本为 JPush Android SDK 6.2.0。
+
+```typescript
+import { requestSubscribeChannel } from "@/uni_modules/jg-jpush-u"
+
+// channelId 需要在小米推送后台申请，单次最多传入 3 个
+requestSubscribeChannel(["your_channel_id"])
+```
+
+使用限制：
+
+- 仅已集成并注册小米通道的小米设备支持。
+- 应用需在前台且设备已亮屏。
+- 订阅弹窗 30 秒内最多调用一次。
+- 调用结果通过 `onCommandResult` 返回，`cmd` 固定为 `2012`。
+- `extra.open_channel_result` 包含各 channel 的操作结果，`extra.jg_platform` 为 `1` 时表示小米。
+
 ## 事件回调
 
 插件支持以下事件回调：
@@ -508,17 +529,19 @@ setDataInsightsEnable(true)
 ### 7. onCommandResult
 命令执行结果回调
 
+小米订阅消息调用结果也通过此事件返回；当 `cmd` 为 `2012` 时，`errorCode` 表示订阅弹窗整体结果，`extra.open_channel_result` 表示各 channel 的用户操作结果。
+
 **回调数据格式：**
-```json
-{
-    "eventName": "onCommandResult",
-    "eventData": {
-        "cmd": "命令类型",
-        "errorCode": 0,
-        "msg": "消息",
-        "extra": "额外数据"
+```typescript
+setEventCallBack({
+    callback: (event) => {
+        if (event.eventName === "onCommandResult") {
+            // eventData 是 JSON 字符串，需要先解析
+            const data = JSON.parse(event.eventData)
+            console.log(data.cmd, data.errorCode, data.extra)
+        }
     }
-}
+})
 ```
 
 ### 8. onTagOperatorResult

@@ -1,7 +1,7 @@
 ---
 name: update-sdk
 description: |
-  更新 jpush-harmony-uniapp-plugin 及其子模块（fcm/huawei/honor/meizu/nio/oppo/vivo/xiaomi）的 JPush SDK 版本。自动拉取极光官网 Changelog，更新主模块 Android config.json（Maven）和 iOS 直引静态库（.a 文件），更新 UTS 层（app-android/app-ios/app-harmony/interface.uts）代码，支持 --module 参数指定子模块，展示变更摘要确认后提示手动上传至 DCloud 插件市场。
+  更新 jpush-harmony-uniapp-plugin 及受支持子模块（fcm/huawei/honor/meizu/oppo/vivo/xiaomi）的 JPush SDK 版本。自动拉取极光官网 Changelog，更新主模块 Android config.json（Maven）和 iOS 直引静态库（.a 文件），更新 UTS 层（app-android/app-ios/app-harmony/interface.uts）代码，支持 --module 参数指定子模块，展示变更摘要确认后提示手动上传至 DCloud 插件市场。NIO 自 JPush Android 6.1.0 起停止支持，仅保留历史兼容。
   Use when: 更新 JPush SDK、升级推送 SDK 版本、UTS 插件更新、鸿蒙插件 SDK 更新、jpush-harmony-uniapp-plugin 发布新版本、更新厂商通道子模块。
 allowed-tools:
   - Bash
@@ -22,8 +22,8 @@ allowed-tools:
 从 `$ARGUMENTS` 中提取：
 - `--android X.X.X` → Android JPush SDK 目标版本（Android 端通过 config.json maven 引用）
 - `--ios X.X.X` → iOS JPush SDK 目标版本（iOS 端直引 .a 静态库）
-- `--module mod1,mod2` → 可选，指定更新哪些子模块（缺省更新全部 8 个子模块）
-  - 可选值：`fcm`、`huawei`、`honor`、`meizu`、`nio`、`oppo`、`vivo`、`xiaomi`
+- `--module mod1,mod2` → 可选，指定更新哪些子模块（缺省更新全部 7 个受支持子模块）
+  - 可选值：`fcm`、`huawei`、`honor`、`meizu`、`oppo`、`vivo`、`xiaomi`
 - `--ios-sdk-path /path` → 可选，本地 iOS SDK 路径（当官网版本不一致时使用）
 
 ---
@@ -77,7 +77,7 @@ python3 .claude/skills/update-sdk/scripts/plugin_updater.py \
 
 ## 第六步：更新子模块（按 --module 过滤）
 
-**先执行此命令获取完整子模块列表**（禁止硬编码，必须从 config.json 动态读取，防止遗漏 nio 等模块）：
+**先执行此命令获取完整受支持子模块列表**（禁止硬编码，必须从 config.json 动态读取）：
 
 ```bash
 python3 -c "
@@ -88,14 +88,14 @@ for m in cfg['uts_sub_modules']:
 "
 ```
 
-对每个需要更新的子模块（缺省全部 8 个：**fcm / huawei / honor / meizu / nio / oppo / vivo / xiaomi**），依次执行以下三步：
+对每个需要更新的子模块（缺省全部 7 个：**fcm / huawei / honor / meizu / oppo / vivo / xiaomi**），依次执行以下三步：
 
 **① 更新 android_config（config.json 中的 dep_prefix 对应依赖）**
 
 找到 `dependencies` 数组中以 `dep_prefix` 开头的条目，将版本号替换为新的 Android SDK 版本：
 
 ```
-cn.jiguang.sdk.plugin:nio:旧版本  →  cn.jiguang.sdk.plugin:nio:<ANDROID_VERSION>
+cn.jiguang.sdk.plugin:xiaomi:旧版本  →  cn.jiguang.sdk.plugin:xiaomi:<ANDROID_VERSION>
 ```
 
 **② bump package.json 版本号（patch，规则同主模块）**
@@ -111,14 +111,14 @@ cn.jiguang.sdk.plugin:nio:旧版本  →  cn.jiguang.sdk.plugin:nio:<ANDROID_VER
 更新到{ANDROID_VERSION}
 ```
 
-> **示例**——jg-jpush-u-nio 子模块（Android SDK 6.1.0，新版本 1.2.3，今日 2026-05-15）：
+> **示例**——jg-jpush-u-xiaomi 子模块（Android SDK 6.2.0，新版本 1.2.4，今日 2026-07-28）：
 >
-> android_config: `cn.jiguang.sdk.plugin:nio:6.0.1` → `cn.jiguang.sdk.plugin:nio:6.1.0`
-> package.json: `"version": "1.2.2"` → `"version": "1.2.3"`
+> android_config: `cn.jiguang.sdk.plugin:xiaomi:6.1.0` → `cn.jiguang.sdk.plugin:xiaomi:6.2.0`
+> package.json: `"version": "1.2.3"` → `"version": "1.2.4"`
 > changelog.md 顶部插入：
 > ```
-> ## 1.2.3（2026-05-15）
-> 更新到6.1.0
+> ## 1.2.4（2026-07-28）
+> 更新到6.2.0
 > ```
 
 ---
@@ -180,7 +180,7 @@ iOS JPush SDK:     旧版本 → 新版本（.a 文件已替换）
 ⚠️  以下所有子目录需手动上传至 DCloud 插件市场：
   - uni_modules/jg-jpush-u
   - uni_modules/jg-jpush-u-fcm
-  ...（共 9 个）
+  ...（主插件 + 7 个受支持厂商插件，共 8 个）
 =========================================================
 
 确认以上变更并继续？[y/N]

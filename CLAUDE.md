@@ -13,7 +13,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `uni_modules/` 下共 9 个插件：
 
 - **jg-jpush-u** — 主插件，包含全部 API 实现
-- **jg-jpush-u-{fcm,huawei,honor,meizu,nio,oppo,vivo,xiaomi}** — 8 个厂商通道子模块，内容很薄：仅 `app-android/config.json`（Maven 依赖 `cn.jiguang.sdk.plugin:<厂商>:<版本>`）加一个几乎空的 `index.uts`
+- **jg-jpush-u-{fcm,huawei,honor,meizu,oppo,vivo,xiaomi}** — 7 个仍受支持的厂商通道子模块，内容很薄：仅 `app-android/config.json`（Maven 依赖 `cn.jiguang.sdk.plugin:<厂商>:<版本>`）加一个几乎空的 `index.uts`
+- **jg-jpush-u-nio** — 历史兼容模块；JPush Android 6.1.0 起官方停止支持 NIO SDK，不参与后续 SDK 更新与发布
 
 主插件 `uni_modules/jg-jpush-u/utssdk/` 的三端结构：
 

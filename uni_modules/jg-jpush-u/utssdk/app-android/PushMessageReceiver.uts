@@ -144,7 +144,13 @@ export class PushMessageReceiver extends JPushMessageReceiver {
             jsonObject.put("cmd", cmdMessage.cmd);
             jsonObject.put("errorCode", cmdMessage.errorCode);
             jsonObject.put("msg", cmdMessage.msg);
-            jsonObject.put("extra", cmdMessage.extra);
+            if (cmdMessage.cmd == 2012) {
+                // 小米订阅消息需要向 UTS 层透传结构化的 channel 操作结果
+                jsonObject.put("extra", this.convertBundleToJson(cmdMessage.extra));
+            } else {
+                // 保持历史命令的 extra 序列化行为，避免改变既有回调语义
+                jsonObject.put("extra", cmdMessage.extra);
+            }
             return jsonObject.toString();
         } catch (e) {
             Log.e(PushMessageReceiver.TAG, "convertCmdMessageToJson error: " + e.toString());
@@ -450,4 +456,4 @@ export class PushMessageReceiver extends JPushMessageReceiver {
             this.triggerEventCallback('onVoipMessage', '{"messageId":"","extraData":"","platform":0}');
         }
     }
-} 
+}

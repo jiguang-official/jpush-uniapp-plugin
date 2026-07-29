@@ -74,12 +74,6 @@
       "package_json": "uni_modules/jg-jpush-u-meizu/package.json"
     },
     {
-      "name": "jg-jpush-u-nio",
-      "android_config": "uni_modules/jg-jpush-u-nio/utssdk/app-android/config.json",
-      "dep_prefix": "cn.jiguang.sdk.plugin:nio:",
-      "package_json": "uni_modules/jg-jpush-u-nio/package.json"
-    },
-    {
       "name": "jg-jpush-u-oppo",
       "android_config": "uni_modules/jg-jpush-u-oppo/utssdk/app-android/config.json",
       "dep_prefix": "cn.jiguang.sdk.plugin:oppo:",
@@ -123,10 +117,16 @@
       "uni_modules/jg-jpush-u-huawei",
       "uni_modules/jg-jpush-u-honor",
       "uni_modules/jg-jpush-u-meizu",
-      "uni_modules/jg-jpush-u-nio",
       "uni_modules/jg-jpush-u-oppo",
       "uni_modules/jg-jpush-u-vivo",
       "uni_modules/jg-jpush-u-xiaomi"
     ]
-  }
+  },
+  "unsupported_sub_modules": [
+    {
+      "name": "jg-jpush-u-nio",
+      "last_supported_plugin_version": "6.0.1",
+      "note": "JPush Android SDK 6.1.0 起官方停止支持 NIO SDK，仅保留历史兼容，不参与后续 SDK 更新与发布"
+    }
+  ]
 }

@@ -1,3 +1,5 @@
+## 1.3.1（2026-07-29）
+Android/iOS JPush SDK 升级至 6.2.0、JCore SDK 升级至 5.5.0；Android 更新厂商通道并新增小米订阅消息接口 requestSubscribeChannel
 ## 1.3.0（2026-06-29）
 鸿蒙补充通知送达回调 onNotifyMessageArrived 与通知未展示回调 onNotifyMessageUnShow（事件名与 Android/iOS 对齐），修复极光通道收到通知不触发送达回调的问题
 ## 1.2.9（2026-06-12）

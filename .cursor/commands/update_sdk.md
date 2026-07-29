@@ -9,7 +9,7 @@
 - **Android**: 需更新 **所有** 以 `jg-jpush-u` 开头的插件下的 Android 依赖版本（保持与目标 SDK 版本一致）：
   - **主插件**：`uni_modules/jg-jpush-u/utssdk/app-android/config.json`  
     更新 `dependencies` 中 `cn.jiguang.sdk:jpush` 的版本号（如 `"cn.jiguang.sdk:jpush:6.0.1"`）
-  - **厂商子插件**：`uni_modules/jg-jpush-u-<厂商>/utssdk/app-android/config.json`（如 fcm、honor、huawei、meizu、nio、oppo、vivo、xiaomi 等）  
+  - **厂商子插件**：`uni_modules/jg-jpush-u-<厂商>/utssdk/app-android/config.json`（fcm、honor、huawei、meizu、oppo、vivo、xiaomi；NIO 已停止支持，不再更新）
     更新各插件 `dependencies` 中对应的 `cn.jiguang.sdk` 相关依赖的版本号（如 `cn.jiguang.sdk.plugin:fcm:6.0.1`），确保与主插件 JPush 版本一致
   - 可先全局搜索 `cn.jiguang.sdk`，在 `uni_modules` 下所有 `jg-jpush-u*` 插件的 `config.json` 中统一更新版本号
 - **iOS**: iOS SDK 通过静态库（.a 文件）引入，需同时更新 **JPush** 与 **JCore** 两套库：
@@ -143,7 +143,7 @@ UTS插件通过 `uni_modules` 方式引入，通常不需要在 `README.md` 中�
 需在 **主插件** 与 **所有子插件** 的 changelog 中记录本次变更（与第 1 步中修改过的插件范围一致）：
 
 - **主插件**：`uni_modules/jg-jpush-u/changelog.md`
-- **厂商子插件**：`uni_modules/jg-jpush-u-<厂商>/changelog.md`（如 fcm、honor、huawei、meizu、nio、oppo、vivo、xiaomi 等，凡本次更新了依赖或版本号的子插件均需更新其 changelog）
+- **厂商子插件**：`uni_modules/jg-jpush-u-<厂商>/changelog.md`（fcm、honor、huawei、meizu、oppo、vivo、xiaomi；凡本次更新了依赖或版本号的子插件均需更新其 changelog）
 
 记录内容建议包括：
 - SDK 版本更新（Android 和 iOS 版本号）

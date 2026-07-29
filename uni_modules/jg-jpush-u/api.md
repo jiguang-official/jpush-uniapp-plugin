@@ -526,6 +526,31 @@ resumePush()
 
 - 无
 
+## 请求小米订阅消息渠道（requestSubscribeChannel）
+
+### 功能说明
+
+> * Android-only，开始支持的版本为 JPush Android SDK 6.2.0。
+> * 仅已集成并注册小米通道的小米设备支持。
+> * 单次最多传入 3 个小米订阅类 channelId。
+> * 结果在回调事件 `onCommandResult` 返回，其中 `cmd` 为 `2012`。
+
+### 接口定义
+
+```ts
+requestSubscribeChannel(channelIds: string[])
+```
+
+### 代码示例
+
+```ts
+requestSubscribeChannel(["your_channel_id"])
+```
+
+### 参数说明
+
+- `channelIds`：在小米推送后台申请的订阅类 channelId 列表。
+
 ## 通知状态查询（isPushStopped）
 
 ### 功能说明
