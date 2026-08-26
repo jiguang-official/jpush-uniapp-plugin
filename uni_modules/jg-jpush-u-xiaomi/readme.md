@@ -11,20 +11,30 @@
 
 ```json
 {
-    "XIAOMI_APPKEY": "您的应用对应的小米的APPKEY",
-    "XIAOMI_APPID": "您的应用对应的小米的APPID"
+    "XIAOMI_APPKEY": "MI-您的应用对应的小米的APPKEY",
+    "XIAOMI_APPID": "MI-您的应用对应的小米的APPID"
 }
 ```
 
+> **⚠️ 重要：`XIAOMI_APPKEY`、`XIAOMI_APPID` 两项的值必须加 `MI-` 前缀**
+>
+> 例如 APP ID 是 `2882303000000000000`，这里要填 `MI-2882303000000000000`。极光 SDK 读取时会自动去掉前 3 个字符的前缀。
+>
+> 原因：`manifestPlaceholders.json` 里的值只是做**文本替换**写进 AndroidManifest，JSON 的引号不会传递过去。
+> 当值是纯数字时（厂商 APP ID 通常就是纯数字），aapt2 会把它编译成 **整型（int）** 而不是字符串，
+> SDK 用 `Bundle.getString()` 就会读到 `null`，表现为"清单文件里明明配了却读不到"，厂商通道注册失败、拿不到厂商 token。
+> 加上非数字的前缀后，aapt2 就会按字符串编译，问题不再出现。
+
+
 **参数说明：**
-- `XIAOMI_APPKEY`: 小米平台注册的appkey
-- `XIAOMI_APPID`: 小米平台注册的appid，
+- `XIAOMI_APPKEY`: 小米平台注册的appkey，需加 `MI-` 前缀
+- `XIAOMI_APPID`: 小米平台注册的appid，需加 `MI-` 前缀（APP ID 是纯数字）
 
 **示例配置：**
 ```json
 {
-  "XIAOMI_APPKEY": "1234567890abcdef",
-  "XIAOMI_APPID": "9876543210fedcba"
+  "XIAOMI_APPKEY": "MI-5832000000000",
+  "XIAOMI_APPID": "MI-2882303000000000000"
 }
 ```
 
@@ -45,6 +55,7 @@ import {
 
 - 确保已在小米开发者平台注册应用并获取APPKEY和APPID
 - 确保已正确配置manifestPlaceholders.json文件
+- 配置值必须加 `MI-` 前缀，否则纯数字的 APP ID 会被编译成整型导致 SDK 读取失败（详见 2.1 节说明）
 - 该插件仅支持Android平台
 - 需要配合jg-jpush-u主插件使用
 
