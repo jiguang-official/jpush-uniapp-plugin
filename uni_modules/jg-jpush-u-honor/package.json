@@ -1,11 +1,11 @@
 {
   "id": "jg-jpush-u-honor",
   "displayName": "jg-jpush-u-honor",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "jg-jpush-u-honor",
   "keywords": [
     "jg-jpush-u-honor"
-],
+  ],
   "repository": "https://github.com/jiguang-official/jpush-uniapp-plugin",
   "engines": {
     "HBuilderX": "^3.6.8",

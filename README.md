@@ -1,3 +1,5 @@
+> 本轮候选1.3.2的三端版本、新接口、生命周期和构建边界见 [SDK升级说明](uni_modules/jg-jpush-u/SDK-6.3-upgrade.md)。尚未正式发布。
+
 # jg-uniapp-demo
 
 # 手动下载复制

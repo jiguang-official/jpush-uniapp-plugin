@@ -9,7 +9,7 @@
  * Copyright (c) 2011 ~ 2017 Shenzhen HXHG. All rights reserved.
  */
 
-#define JPUSH_VERSION_NUMBER 6.2.0
+#define JPUSH_VERSION_NUMBER 6.3.0
 
 #import <Foundation/Foundation.h>
 
@@ -33,6 +33,15 @@ typedef void (^JPUSHTagValidOperationCompletion)(NSInteger iResCode, NSSet *_Nul
 typedef void (^JPUSHAliasOperationCompletion)(NSInteger iResCode, NSString *_Nullable iAlias, NSInteger seq);
 typedef void (^JPUSHPropertiesOperationCompletion)(NSInteger iResCode, NSDictionary *_Nullable properties, NSInteger seq);
 typedef void (^JPUSHLiveActivityTokenCompletion)(NSInteger iResCode, NSString *_Nullable iLiveActivityId, NSData *  _Nullable pushToken, NSInteger seq);
+
+typedef NS_ENUM(NSInteger, JPUSHPushRegistrationErrorCode) {
+  JPUSHPushRegistrationErrorCodeSuccess = 0,
+  JPUSHPushRegistrationErrorCodeTimeout = 6002,
+  JPUSHPushRegistrationErrorCodeInternal = 6009,
+  JPUSHPushRegistrationErrorCodeSuperseded = 6010,
+  JPUSHPushRegistrationErrorCodeTokenUnbindFailed = 6011,
+  JPUSHPushRegistrationErrorCodeNotInitialized = 6012,
+};
 
 extern NSString *const kJPFNetworkIsConnectingNotification; // 正在连接中
 extern NSString *const kJPFNetworkDidSetupNotification;     // 建立连接
@@ -235,6 +244,12 @@ typedef NS_ENUM(NSUInteger, JPAuthorizationStatus) {
        apsForProduction:(BOOL)isProduction
   advertisingIdentifier:(nullable NSString *)advertisingId;
 
+/*! 恢复远程通知注册与 JPush 网络服务。可从任意线程调用。 */
++ (void)turnOnPush;
+
+/*! 解绑 APNs Token 并暂停 JPush 网络服务；completion 固定在主线程异步回调。 */
++ (void)turnOffPush:(nullable void (^)(NSInteger iResCode))completion;
+
 
 ///----------------------------------------------------
 /// @name APNs about 通知相关
@@ -260,6 +275,16 @@ typedef NS_ENUM(NSUInteger, JPAuthorizationStatus) {
 
 
 + (void)registerDeviceToken:(NSData *)deviceToken;
+
+/*!
+ * @abstract 控制 Live Activity Token 上报链路埋点。
+ *
+ * @discussion 进程启动默认关闭，仅影响诊断埋点，不影响 Token 的绑定、解绑、
+ * 重发、超时和业务回调。该开关与服务端下发的埋点开关相互独立：任一为开即上报，
+ * 两者都关才停止。通过本接口关闭且服务端开关也为关时，旧代际尚未交给 JCore 的埋点
+ * 会被丢弃；服务端开关关闭后，尚未发出的埋点不再上报。
+ */
++ (void)setLiveActivityTokenReportEnabled:(BOOL)enabled;
 
 /*!
  * @abstract 上报liveactivity的启动token

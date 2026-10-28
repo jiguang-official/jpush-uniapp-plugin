@@ -35,9 +35,9 @@
 **示例配置：**
 ```json
 {
-  "OPPO_APPKEY": "OP-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+  "OPPO_APPKEY": "OP-YOUR_VENDOR_VALUE",
   "OPPO_APPID": "OP-12345678",
-  "OPPO_APPSECRET": "OP-f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3"
+  "OPPO_APPSECRET": "OP-YOUR_VENDOR_VALUE"
 }
 ```
 

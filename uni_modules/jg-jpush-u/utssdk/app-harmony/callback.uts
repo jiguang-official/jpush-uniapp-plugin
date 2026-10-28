@@ -31,22 +31,27 @@ export function getCachedRid() : string {
 
 export class CallBackMsgUni extends CallBackMsg {
 
-	callback : EventCallBackParams
+	callback : EventCallBackParams | null
+	stateChanged: (() => void) | null
 
-	constructor(co : EventCallBackParams) {
+	constructor(co : EventCallBackParams, stateChanged: () => void) {
 		super();
 		this.callback = co
+		this.stateChanged = stateChanged
 	}
 
 	/**
 	 * 注册成功后回调rid
 	 * @param registrationId 注册成功后回调rid
 	 */
+	dispose(): void { this.callback = null; this.stateChanged = null }
+	emitBridgeError(): void { this.callback?.callback?.({eventName:"onBridgeError", eventData:"NATIVE_ERROR"}) }
 	onRegister(registrationId : string) : void {
-		console.log(TAG, 'onRegister registrationId:' + registrationId);
+		if (this.callback == null) return
 		setCachedRid(registrationId)
+		this.stateChanged?.()
 		let v : EventCallBack = { "eventName": "onRegister", "eventData": registrationId };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
@@ -54,9 +59,8 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * @param isConnected true:成功，false：失败
 	 */
 	onConnected(isConnected : boolean) : void {
-		console.log(TAG, 'onConnected isConnected:' + isConnected);
 		let v : EventCallBack = { "eventName": "onConnected", "eventData": isConnected + "" };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
@@ -73,10 +77,9 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * }
 	 */
 	onTagOperatorResult(jTagMessage : JTagMessage) : void {
-		console.log(TAG, 'onTagOperatorResult JTagMessage:' + JSON.stringify(jTagMessage));
 
 		let v : EventCallBack = { "eventName": "onTagOperatorResult", "eventData": JSON.stringify(jTagMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 	/**
 	 * 操作 Alias 接口回调
@@ -92,15 +95,13 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * }
 	 */
 	onAliasOperatorResult(jAliasMessage : JAliasMessage) : void {
-		console.log(TAG, 'onAliasOperatorResult jAliasMessage:' + JSON.stringify(jAliasMessage));
 		let v : EventCallBack = { "eventName": "onAliasOperatorResult", "eventData": JSON.stringify(jAliasMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	onMobileNumberOperatorResult(jMobileNumberMessage : JMobileNumberMessage) {
-		console.log(TAG, 'onMobileNumberOperatorResult jMobileNumberMessage:' + JSON.stringify(jMobileNumberMessage));
 		let v : EventCallBack = { "eventName": "onMobileNumberOperatorResult", "eventData": JSON.stringify(jMobileNumberMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 	/**
 	 * 通知点击事件回调
@@ -114,9 +115,8 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * }
 	 */
 	onClickMessage(jMessage : JMessage) {
-		console.log(TAG, 'onClickMessage jMessage:' + JSON.stringify(jMessage));
 		let v : EventCallBack = { "eventName": "onClickMessage", "eventData": JSON.stringify(jMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
@@ -125,9 +125,8 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * @param jMessage
 	 */
 	onArrivedMessage(jMessage : JMessage) {
-		console.log(TAG, 'onArrivedMessage jMessage:' + JSON.stringify(jMessage));
 		let v : EventCallBack = { "eventName": "onNotifyMessageArrived", "eventData": JSON.stringify(jMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
@@ -136,9 +135,8 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * @param jMessage
 	 */
 	onUnShowMessage(jMessage : JMessage) {
-		console.log(TAG, 'onUnShowMessage jMessage:' + JSON.stringify(jMessage));
 		let v : EventCallBack = { "eventName": "onNotifyMessageUnShow", "eventData": JSON.stringify(jMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
@@ -158,9 +156,8 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * }
 	 */
 	onCustomMessage(jCustomMessage : JCustomMessage) {
-		console.log(TAG, 'onCustomMessage jCustomMessage:' + JSON.stringify(jCustomMessage));
 		let v : EventCallBack = { "eventName": "onCustomMessage", "eventData": JSON.stringify(jCustomMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 	/**
 	 * 通知扩展消息回调
@@ -175,23 +172,22 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * }
 	 */
 	onJMessageExtra(jme : JMessageExtra) {
-		console.log(TAG, 'onJMessageExtra jme:' + JSON.stringify(jme));
 		let v : EventCallBack = { "eventName": "onJMessageExtra", "eventData": JSON.stringify(jme) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
 	 * VoIP呼叫消息回调
 	 * export class JMessageVoIP {
 	 * msgId?: string //通知id
+	 * callId?: string //VoIP通话标识（原样字符串）
 	 * extraData?: string //VoIP自定义数据
 	 }
 	 * @param jmVoIP
 	 */
 	onJMessageVoIP(jmVoIP : JMessageVoIP) {
-		console.log(TAG, 'JMessageVoIP jmVoIP:' + JSON.stringify(jmVoIP));
 		let v : EventCallBack = { "eventName": "onJMessageVoIP", "eventData": JSON.stringify(jmVoIP) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 	/**
@@ -208,9 +204,9 @@ export class CallBackMsgUni extends CallBackMsg {
 	 * }
 	 */
 	onCommandResult(cmdMessage : JCmdMessage) {
-		console.log(TAG, 'onCommandResult cmdMessage:' + JSON.stringify(cmdMessage));
+		if (cmdMessage.cmd == 2006 || cmdMessage.cmd == 2007) this.stateChanged?.()
 		let v : EventCallBack = { "eventName": "onCommandResult", "eventData": JSON.stringify(cmdMessage) };
-		this.callback.callback?.(v);
+		this.callback?.callback?.(v);
 	}
 
 }

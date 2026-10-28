@@ -39,7 +39,7 @@ class EventCallbackManager {
 			if (callback !== null) {
 				callback(event)
 			} else {
-				console.log(TAG, "未设置回调函数，事件内容：", event)
+				console.log(TAG, "未设置回调函数")
 			}
 		} else {
 			console.log(TAG, "回调未设置，缓存事件")
@@ -63,7 +63,7 @@ export const eventCallbackManager = new EventCallbackManager()
 export const init = function (appKey? : string) {
 	JPushInterface.setNotificationCallBackEnable(UTSAndroid.getAppContext(),true)
 	if (appKey !== null) {
-		console.log(TAG, "init with appKey", appKey)
+		console.log(TAG, "init with explicit appKey")
 		// 创建JPushConfig并设置appKey
 		const config = new JPushConfig()
 		config.setjAppKey(appKey)
@@ -302,3 +302,118 @@ export const requestSubscribeChannel = function (channelIds : string[]) {
 export function setEventCallBack(param : EventCallBackParams) : void {
 	eventCallbackManager.setEventCallBack(param)
 }
+
+
+// New APIs: each native SDK completion owns only a request ID, never a page callback.
+import JPushUPSManager from 'cn.jpush.android.ups.JPushUPSManager'
+import UPSTurnCallBack from 'cn.jpush.android.ups.UPSTurnCallBack'
+import TokenResult from 'cn.jpush.android.ups.TokenResult'
+import Handler from 'android.os.Handler'
+import Looper from 'android.os.Looper'
+import Runnable from 'java.lang.Runnable'
+import AtomicLong from 'java.util.concurrent.atomic.AtomicLong'
+import { PushServiceResult, LiveActivityResult, LiveActivityPushTokenParams, LiveActivityPushToStartTokenParams } from '../interface.uts'
+
+type PendingPushReply = { generation: Long, resolve: (value: PushServiceResult) => void, reject: (error: Error) => void }
+const pendingPushReplies = new Map<Long, PendingPushReply>()
+const requestSequence = new AtomicLong(0)
+const upgradeGeneration = new AtomicLong(0)
+class MainUpgradeTask implements Runnable {
+  private action: (() => void) | null
+  constructor(action: () => void) { this.action = action }
+  override run(): void { const action = this.action; this.action = null; action?.() }
+}
+function upgradeOnMain(action: () => void): void {
+  new Handler(Looper.getMainLooper()).post(new MainUpgradeTask(action))
+}
+function finishPushReply(id: Long, value: PushServiceResult | null, code: string | null): void {
+  upgradeOnMain(() => {
+    const pending = pendingPushReplies.get(id)
+    if (pending == null) return
+    pendingPushReplies.delete(id)
+    if (pending.generation != upgradeGeneration.get()) return
+    if (code != null) pending.reject(new Error(code))
+    else if (value != null) pending.resolve(value)
+  })
+}
+class UpgradePushCallback implements UPSTurnCallBack {
+  private request: Long
+  private enabled: boolean
+  constructor(request: Long, enabled: boolean) { this.request = request; this.enabled = enabled }
+  override onResult(result: TokenResult | null): void {
+    if (result == null) { finishPushReply(this.request, null, 'NATIVE_EXCEPTION'); return }
+    const value: PushServiceResult = { code: Number.from(result.getReturnCode()) }
+    if (this.enabled) value.dispatched = true
+    finishPushReply(this.request, value, null)
+  }
+}
+export function clearUpgradeCallbacks(): void {
+  upgradeGeneration.incrementAndGet()
+  upgradeOnMain(() => {
+    const current = upgradeGeneration.get()
+    const expired = new Array<Long>()
+    pendingPushReplies.forEach((reply, id) => { if (reply.generation != current) expired.push(id) })
+    for (const id of expired) { pendingPushReplies.delete(id) }
+  })
+}
+UTSAndroid.onAppActivityDestroy(() => { clearUpgradeCallbacks() })
+function changePushService(enabled: boolean): Promise<PushServiceResult> {
+  const generation = upgradeGeneration.get()
+  return new Promise<PushServiceResult>((resolve, reject) => {
+    upgradeOnMain(() => {
+      if (generation != upgradeGeneration.get()) { reject(new Error('BRIDGE_INVALIDATED')); return }
+      const context = UTSAndroid.getAppContext()
+      if (context == null) { reject(new Error('NO_CONTEXT')); return }
+      const id = requestSequence.incrementAndGet()
+      pendingPushReplies.set(id, { generation: generation, resolve: resolve, reject: reject })
+      try {
+        const callback = new UpgradePushCallback(id, enabled)
+        if (enabled) JPushUPSManager.turnOnPush(context, callback)
+        else JPushUPSManager.turnOffPush(context, callback)
+      } catch (error) { finishPushReply(id, null, 'NATIVE_EXCEPTION') }
+    })
+  })
+}
+export function turnOffPush(): Promise<PushServiceResult> { return changePushService(false) }
+export function turnOnPush(): Promise<PushServiceResult> { return changePushService(true) }
+export function requestSubscribeChannels(channels: string[]): Promise<void> {
+  if (channels.length < 1 || channels.length > 3) return Promise.reject(new Error('INVALID_ARGUMENT'))
+  const unique = new Set<string>()
+  for (const value of channels) {
+    if (value.trim().length == 0 || unique.has(value)) return Promise.reject(new Error('INVALID_ARGUMENT'))
+    unique.add(value)
+  }
+  const generation = upgradeGeneration.get()
+  return new Promise<void>((resolve,reject) => {
+    upgradeOnMain(() => {
+      if (generation != upgradeGeneration.get()) { reject(new Error('BRIDGE_INVALIDATED')); return }
+      const activity = UTSAndroid.getUniActivity()
+      if (activity == null || activity.isFinishing() || activity.isDestroyed() || !activity.hasWindowFocus()) {
+        reject(new Error('NO_ACTIVITY')); return
+      }
+      const list = new ArrayList<string>()
+      for (const value of channels) list.add(value)
+      try { JPushInterface.requestSubscribeChannels(activity,list); resolve() }
+      catch (error) { reject(new Error('NATIVE_EXCEPTION')) }
+    })
+  })
+}
+export function initCrashHandler(): Promise<void> {
+  return new Promise<void>((resolve,reject) => { upgradeOnMain(() => {
+    try { JPushInterface.initCrashHandler(UTSAndroid.getAppContext()); resolve() }
+    catch (error) { reject(new Error('NATIVE_EXCEPTION')) }
+  }) })
+}
+export function stopCrashHandler(): Promise<void> {
+  return new Promise<void>((resolve,reject) => { upgradeOnMain(() => {
+    try { JPushInterface.stopCrashHandler(UTSAndroid.getAppContext()); resolve() }
+    catch (error) { reject(new Error('NATIVE_EXCEPTION')) }
+  }) })
+}
+export function getRegistrationIdAsync(): Promise<string> { return Promise.resolve(getRegistrationId()) }
+export function isPushStoppedAsync(): Promise<boolean> { return Promise.resolve(isPushStopped()) }
+export function setLiveActivityTokenReportEnabled(enable: boolean): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function registerLiveActivityPushToken(params: LiveActivityPushTokenParams): Promise<LiveActivityResult> { return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function registerLiveActivityPushToStartToken(params: LiveActivityPushToStartTokenParams): Promise<LiveActivityResult> { return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+
+export function initAsync(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }

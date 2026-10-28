@@ -144,7 +144,12 @@ export class PushMessageReceiver extends JPushMessageReceiver {
             jsonObject.put("cmd", cmdMessage.cmd);
             jsonObject.put("errorCode", cmdMessage.errorCode);
             jsonObject.put("msg", cmdMessage.msg);
-            if (cmdMessage.cmd == 2012) {
+            if (cmdMessage.cmd == 2013) {
+                const typedExtra = SubscriptionResultCodec.fromBundle(cmdMessage.extra);
+                jsonObject.put("extra", typedExtra);
+                jsonObject.put("commandData", typedExtra);
+                if (typedExtra.has("channels")) jsonObject.put("channels", typedExtra.get("channels"));
+            } else if (cmdMessage.cmd == 2012) {
                 // 小米订阅消息需要向 UTS 层透传结构化的 channel 操作结果
                 jsonObject.put("extra", this.convertBundleToJson(cmdMessage.extra));
             } else {
@@ -198,7 +203,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onMessage(context: Context, customMessage: CustomMessage): void {
         super.onMessage(context, customMessage);
-        Log.e(PushMessageReceiver.TAG, "[onMessage] " + customMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onMessage] ");
         
         // 触发自定义消息回调
         this.triggerEventCallback('onCustomMessage', this.convertCustomMessageToJson(customMessage));
@@ -209,7 +214,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onPropertyOperatorResult(context: Context, jPushMessage: JPushMessage): void {
         super.onPropertyOperatorResult(context, jPushMessage);
-        Log.e(PushMessageReceiver.TAG, "[onPropertyOperatorResult] " + jPushMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onPropertyOperatorResult] ");
         
         // 触发属性操作结果回调
         this.triggerEventCallback('onPropertyOperatorResult', this.convertJPushMessageToJson(jPushMessage));
@@ -219,7 +224,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      * 通知点击回调
      */
     override onNotifyMessageOpened(context: Context, message: NotificationMessage): void {
-        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageOpened] " + message.toString());
+        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageOpened] ");
         super.onNotifyMessageOpened(context, message);
         
         // 触发通知点击回调
@@ -230,7 +235,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      * 通知展示回调
      */
     override onNotifyMessageArrived(context: Context, message: NotificationMessage): void {
-        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageArrived] " + message.toString());
+        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageArrived] ");
         super.onNotifyMessageArrived(context, message);
         
         // 触发通知展示回调
@@ -242,7 +247,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onNotifyMessageDismiss(context: Context, message: NotificationMessage): void {
         super.onNotifyMessageDismiss(context, message);
-        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageDismiss] " + message.toString());
+        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageDismiss] ");
         
         // 触发通知被清除回调
         this.triggerEventCallback('onNotifyMessageDismiss', this.convertNotificationMessageToJson(message));
@@ -275,7 +280,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onCommandResult(context: Context, cmdMessage: CmdMessage): void {
         super.onCommandResult(context, cmdMessage);
-        Log.e(PushMessageReceiver.TAG, "[onCommandResult] " + cmdMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onCommandResult] ");
         
         // 触发命令结果回调
         this.triggerEventCallback('onCommandResult', this.convertCmdMessageToJson(cmdMessage));
@@ -285,7 +290,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      * 标签操作结果回调
      */
     override onTagOperatorResult(context: Context, jPushMessage: JPushMessage): void {
-        Log.e(PushMessageReceiver.TAG, "[onTagOperatorResult] " + jPushMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onTagOperatorResult] ");
         // TagAliasOperatorHelper.getInstance().onTagOperatorResult(context, jPushMessage);
         super.onTagOperatorResult(context, jPushMessage);
         
@@ -297,7 +302,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      * 检查标签操作结果回调
      */
     override onCheckTagOperatorResult(context: Context, jPushMessage: JPushMessage): void {
-        Log.e(PushMessageReceiver.TAG, "[onCheckTagOperatorResult] " + jPushMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onCheckTagOperatorResult] ");
         // TagAliasOperatorHelper.getInstance().onCheckTagOperatorResult(context, jPushMessage);
         super.onCheckTagOperatorResult(context, jPushMessage);
         
@@ -309,7 +314,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      * 别名操作结果回调
      */
     override onAliasOperatorResult(context: Context, jPushMessage: JPushMessage): void {
-        Log.e(PushMessageReceiver.TAG, "[onAliasOperatorResult] " + jPushMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onAliasOperatorResult] ");
         // TagAliasOperatorHelper.getInstance().onAliasOperatorResult(context, jPushMessage);
         super.onAliasOperatorResult(context, jPushMessage);
         
@@ -322,7 +327,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onMobileNumberOperatorResult(context: Context, jPushMessage: JPushMessage): void {
         super.onMobileNumberOperatorResult(context, jPushMessage);
-        Log.e(PushMessageReceiver.TAG, "[onMobileNumberOperatorResult] " + jPushMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onMobileNumberOperatorResult] ");
         // TagAliasOperatorHelper.getInstance().onMobileNumberOperatorResult(context, jPushMessage);
         
         // 触发手机号操作结果回调
@@ -360,7 +365,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onNotifyMessageUnShow(context: Context, message: NotificationMessage): void {
         super.onNotifyMessageUnShow(context, message);
-        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageUnShow] message:" + message.toString());
+        Log.e(PushMessageReceiver.TAG, "[onNotifyMessageUnShow] message:");
         
         // 触发通知未显示回调
         this.triggerEventCallback('onNotifyMessageUnShow', this.convertNotificationMessageToJson(message));
@@ -371,7 +376,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onInAppMessageShow(context: Context, message: NotificationMessage): void {
         super.onInAppMessageShow(context, message);
-        Log.e(PushMessageReceiver.TAG, "[onInAppMessageShow], " + message.toString());
+        Log.e(PushMessageReceiver.TAG, "[onInAppMessageShow], ");
         
         // 触发应用内消息展示回调
         this.triggerEventCallback('onInAppMessageShow', this.convertNotificationMessageToJson(message));
@@ -382,7 +387,7 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onInAppMessageClick(context: Context, message: NotificationMessage): void {
         super.onInAppMessageClick(context, message);
-        Log.e(PushMessageReceiver.TAG, "[onInAppMessageClick], " + message.toString());
+        Log.e(PushMessageReceiver.TAG, "[onInAppMessageClick], ");
         
         // 触发应用内消息点击回调
         this.triggerEventCallback('onInAppMessageClick', this.convertNotificationMessageToJson(message));
@@ -443,13 +448,14 @@ export class PushMessageReceiver extends JPushMessageReceiver {
      */
     override onVoipMessage(context: Context, voipDataMessage: VoipDataMessage): void {
         super.onVoipMessage(context, voipDataMessage);
-        Log.e(PushMessageReceiver.TAG, "[onVoipMessage] " + voipDataMessage.toString());
+        Log.e(PushMessageReceiver.TAG, "[onVoipMessage] ");
 
         try {
             const jsonObject = new JSONObject();
             jsonObject.put("messageId", voipDataMessage.getMessageId());
             jsonObject.put("extraData", voipDataMessage.getExtraData());
             jsonObject.put("platform", voipDataMessage.getPlatform());
+            jsonObject.put("voipSupportStatus", voipDataMessage.getVoipSupportStatus());
             this.triggerEventCallback('onVoipMessage', jsonObject.toString());
         } catch (e) {
             Log.e(PushMessageReceiver.TAG, "onVoipMessage JSON error: " + e.toString());

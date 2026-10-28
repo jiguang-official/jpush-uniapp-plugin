@@ -1,13 +1,12 @@
 {
-	"dependencies": [
-		"cn.jiguang.sdk.plugin:xiaomi:6.2.0"
-
-	],
-	"minSdkVersion": "21",
-	"project": {
-		"repositories": [
-			"google()",
-			"mavenCentral()"
-		]
-	}
+  "dependencies": [
+    "cn.jiguang.sdk.plugin:xiaomi:6.3.0"
+  ],
+  "minSdkVersion": "21",
+  "project": {
+    "repositories": [
+      "google()",
+      "mavenCentral()"
+    ]
+  }
 }

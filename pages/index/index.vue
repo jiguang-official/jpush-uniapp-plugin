@@ -18,6 +18,7 @@
 </template>
 
 <script setup>
+import { onUnload } from '@dcloudio/uni-app'
 	import {
 		ref
 	} from 'vue';
@@ -47,6 +48,7 @@
 	// } from "@/uni_modules/jg-jpush-u-vivo"
 
 	import {
+		clearUpgradeCallbacks,
 		init,
 		setDebug,
 		setChannel,
@@ -75,6 +77,9 @@
 	} from "@/uni_modules/jg-jpush-u"
 	// #endif
 
+
+	// Release this page's pending upgrade callbacks before its UI is destroyed.
+	onUnload(() => { clearUpgradeCallbacks() })
 
 	let msg = ref(uni.getSystemInfoSync().platform + "\n");
 
