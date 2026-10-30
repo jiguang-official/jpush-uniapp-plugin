@@ -1,9 +1,9 @@
-# 本地契约测试
+# 开发检查
 
-测试不进入DCloud模块上传目录。
+本目录为公开的开发检查用例，不属于DCloud模块上传目录。
 
-- Harmony：在本目录安装开发依赖后运行`npm test`；执行真实app-harmony UTS源码的TypeScript转译结果，SDK/Ability由mock替代。此项不等于ArkTS/HAP编译。
-- iOS codec：仓库根运行`swiftc uni_modules/jg-jpush-u/utssdk/app-ios/JPushUpgradeCodec.swift tests/ios/main.swift -o /tmp/jpush-codec-test`，执行该产物。覆盖hex/null、32bit序号、标识及并发失效，不证明iOS SDK真实回调。
-- Android：使用HBuilderX生成本次模块的index.kt，与本模块SubscriptionResultCodec.java、正式JPush6.3.0/JCore5.6.0及HBuilder对应runtime一起编译；JUnit4/Robolectric4.14.1执行tests/android。Core AAR的libs内还含公开门面jar，必须一并加入classpath。测试使用真实生成Kotlin和Java，未复制实现。Android SDK28测试环境；测试classpath需要解包AndroidX test monitor/espresso的AAR classes.jar（普通JVM Gradle不会自动解包AAR）。
+- Harmony：安装本目录开发依赖后运行`npm test`。用例通过TypeScript执行UTS逻辑，并替代SDK/Ability边界；不替代ArkTS/HAP编译。
+- iOS codec：在仓库根执行`swiftc uni_modules/jg-jpush-u/utssdk/app-ios/JPushUpgradeCodec.swift tests/ios/main.swift -o /tmp/jpush-codec-test`，再运行生成程序。用于检查参数转换和回调隔离，不替代iOS SDK真实回调。
+- Android：使用支持UTS混编的HBuilderX生成模块Kotlin代码，与SubscriptionResultCodec.java、对应JPush/JCore及DCloud runtime编译后执行`tests/android`中的JUnit/Robolectric用例。JCore AAR内的公开门面jar需加入classpath；普通JVM Gradle环境还需解包AndroidX test monitor/espresso的AAR classes.jar。
 
-实际验证工具为HBuilderX5.15、Kotlin2.2.0、JDK17。完整APK与真机需匹配合法自定义基座/离线配置，测试不能替代该项。
+集成应用仍需使用匹配的合法自定义基座或离线配置，并验证对应设备、权限及推送通道。

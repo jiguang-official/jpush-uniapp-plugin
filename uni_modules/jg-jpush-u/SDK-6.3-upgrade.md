@@ -1,6 +1,6 @@
 # 1.3.2 SDK 升级与公开接口
 
-候选版本1.3.2遵循本仓更新脚本的patch规则，尚未发布。Android JPush6.3.0（JCore由Maven传递依赖解析，当前核验5.6.0）；iOS内嵌官方JPush6.3.0/JCore5.6.0 device arm64静态库；Harmony @jg/push1.5.0。旧JG-JPush插件线不在本次范围。
+1.3.2：Android JPush6.3.0（JCore5.6.0由Maven传递依赖解析）；iOS内嵌官方JPush6.3.0/JCore5.6.0 device arm64静态库；Harmony @jg/push1.5.0。旧JG-JPush插件线独立维护。
 
 ## 接口与事件矩阵
 
@@ -41,16 +41,15 @@ turnOffPush().then(result => { /* 检查原生业务code */ }).catch(error => co
 
 ## 厂商与二进制
 
-同仓config.json列出的7款仍维护厂商模块均同步正式6.3.0适配包：FCM/Honor/Huawei/Meizu/OPPO/Vivo/Xiaomi；各模块单独patch版本及日志已更新。真实AAR公开类均核验unregister(Context):boolean，作为SDK内部SPI兼容检查，不向业务暴露。已停更NIO保留6.1.0，未捏造新包。使用方仅集成所需厂商模块，配置AppID/权限及厂商设备验收仍需自行完成。
+7个维护中的厂商模块（FCM、Honor、Huawei、Meizu、OPPO、Vivo、Xiaomi）使用6.3.0配套构件，模块版本为1.2.5。NIO模块保持1.2.3，原生构件保持6.1.0。使用方仅集成所需厂商模块，并完成相应AppID、权限和厂商通道配置。
 
-iOS库取自官方6.3.0 zip，device arm64切片；隐私清单合并同包JPush/JCore正式manifest条目，未采用noidfa二进制冒充标准包。此仓原有静态库布局只含真机arm64，不宣称支持模拟器。验证时临时宿主采用官方同版模拟器切片仅用于编译/链接检查，不改变发行二进制布局。最低系统/权限声明保持原有；LiveActivity新入口有系统版本保护。混编Java/Swift需要支持UTS原生混编的HBuilderX（官方4.25起），已有uni-app/uni-app-x声明4.75起；本轮实际编译工具5.15。本轮HBuilderX engines由^3.6.8调整为^4.25以声明新增混编的真实最低要求；uni-app/uni-app-x既有^4.75要求保持。只实测5.15，未声明4.25或最低系统已实际构建通过。
+iOS随包原生库为官方JPush6.3.0/JCore5.6.0标准版device arm64静态库，包含对应隐私清单，不支持iOS Simulator。LiveActivity入口包含系统版本判断。Java/Swift混编要求HBuilderX 4.25及以上，uni-app/uni-app-x要求4.75及以上；实际部署版本还需同时满足所用框架及原生SDK的系统要求。
 
-## 验证与发布边界
+## 集成要求
 
-- HBuilderX5.15真实生成Android Kotlin，Kotlin2.2对实际DCloud runtime和正式SDK6.3/5.6原生类型编译通过。5项Robolectric测试运行实际生成Kotlin/Java，覆盖多旧请求清理、新代保留、迟到重复回调及null command extra与嵌套类型。
-- Harmony实际UTS源码11项mock契约通过；无DevEco/hvigor/原生SDK构建环境，未执行ArkTS/HAP构建。用户豁免Harmony真机。
-- Swift codec可执行边界测试及100次并发代际失效通过；HBuilder iOS UTS原生编译/链接用官方同版模拟器切片通过。未执行随包device切片完整真机宿主构建/运行。
-- Android完整APK/真机仍待匹配合法DCloud自定义基座或官方离线工程配置；未拿标准基座或其他插件的消息结果替代，尚未发送UniApp验证消息。后台/冷启/厂商/UPS/VoIP真实行为均未外推通过。
-- 当前仅源码PR，不自动HBuilder上传、tag、DCloud发布。模块产物排除测试、unpackage、离线SDK、签名与真实测试身份。
+- 为应用配置匹配的JPush AppKey、包名/Bundle ID、签名、通知权限及所需厂商通道；初始化完成不表示已注册或具备离线送达能力。
+- 鸿蒙应用需具备PushKit开放能力及匹配的签名/推送配置。查询状态不可用时处理STATUS_UNAVAILABLE；停用返回非零code时按业务失败处理，恢复的dispatched结果不代表已经连接。
+- LiveActivity须使用实际系统提供的Token；诊断上报开关与服务端LiveActivity开关分别配置。
+- 多页面共享插件时，由共同业务owner管理clearUpgradeCallbacks，避免清理其他活跃页面的请求。
 
-来源：本仓CLAUDE.md与update-sdk配置/脚本；[Android版本记录](https://docs.jiguang.cn/jpush/jpush_changelog/updates_Android)、[iOS版本记录](https://docs.jiguang.cn/jpush/jpush_changelog/updates_iOS)、[Harmony正式包](https://ohpm.openharmony.cn/ohpm/@jg%2Fpush)、正式Maven POM/AAR、官方iOS发行包和公开头文件；[DCloud混编规则](https://doc.dcloud.net.cn/uni-app-x/plugin/uts-plugin-hybrid.html)。
+参考：[Android版本记录](https://docs.jiguang.cn/jpush/jpush_changelog/updates_Android)、[iOS版本记录](https://docs.jiguang.cn/jpush/jpush_changelog/updates_iOS)、[Harmony正式包](https://ohpm.openharmony.cn/ohpm/@jg%2Fpush)、正式Maven POM/AAR、官方iOS发行包和公开头文件；[DCloud混编规则](https://doc.dcloud.net.cn/uni-app-x/plugin/uts-plugin-hybrid.html)。

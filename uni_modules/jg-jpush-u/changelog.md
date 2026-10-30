@@ -1,4 +1,4 @@
-## 1.3.2 (2026-10-29)
+## 1.3.2
 - 修复 iOS 推送暂停及 LiveActivity 回调注册时的类型转换异常。
 - 新增Java/Swift混编，要求HBuilderX 4.25及以上；uni-app/uni-app-x仍要求4.75及以上。
 - Android新增多channel订阅、UPS结果和显式crash handler；cmd2013保型、VoIP状态整数透出。
