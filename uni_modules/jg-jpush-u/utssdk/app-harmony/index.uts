@@ -335,7 +335,7 @@ export function turnOffPush(): Promise<PushServiceResult> {
 export function turnOnPush(): Promise<PushServiceResult> {
   JPushInterface.turnOnPush(UTSHarmony.getUIAbilityContext())
   refreshCachedPushStopped()
-  return Promise.resolve({dispatched:true})
+  return Promise.resolve({dispatched:true} as PushServiceResult)
 }
 export function requestSubscribeChannels(channels: string[]): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
 export function initCrashHandler(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
