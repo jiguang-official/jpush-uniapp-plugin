@@ -55,7 +55,7 @@
 **示例配置：**
 ```json
 {
-  "JPUSH_APPKEY": "0e61f6029655510c1350a80e",
+  "JPUSH_APPKEY": "YOUR_APP_KEY",
   "JPUSH_CHANNEL": "developer-default"
 }
 ```
