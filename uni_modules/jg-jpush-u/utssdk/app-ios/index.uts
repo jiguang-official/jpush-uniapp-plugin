@@ -652,7 +652,8 @@ export function turnOffPush(): Promise<PushServiceResult> {
       if (generation != Number.from(JPushUpgradeCodec.generation())) { reject(new Error('BRIDGE_INVALIDATED')); return }
       iosRequestSequence += 1
       const id = iosRequestSequence
-      iosPushReplies.set(id, {generation:generation,resolve:resolve,reject:reject})
+      // 显式适配 Error 回调，避免 Swift 将 Promise 的宽类型 reject 强转为窄类型函数。
+      iosPushReplies.set(id, {generation:generation,resolve:resolve,reject:(error: Error) => { reject(error) }})
       JPUSHService.turnOffPush((code: Int) => { finishIOSPush(id, {code:Number.from(code)}) })
     })
   })
@@ -684,7 +685,7 @@ function registerLiveToken(identifier: string, token: string | null, sequence: n
       if (generation != Number.from(JPushUpgradeCodec.generation())) { reject(new Error('BRIDGE_INVALIDATED')); return }
       iosRequestSequence += 1
       const id = iosRequestSequence
-      iosTokenReplies.set(id, {generation:generation,resolve:resolve,reject:reject})
+      iosTokenReplies.set(id, {generation:generation,resolve:resolve,reject:(error: Error) => { reject(error) }})
       const completion = (code: Int, activityId: string | null, resultToken: Data | null, seq: Int) => {
         DispatchQueue.main.async(execute = () => {
           const pending = iosTokenReplies.get(id)

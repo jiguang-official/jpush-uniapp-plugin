@@ -1,12 +1,11 @@
-## 候选1.3.2接口补充
-- 新增Java/Swift混编，HBuilderX最低元数据更新至4.25；实际验证5.15，uni-app/uni-app-x原4.75要求保持。
+## 1.3.2 (2026-10-29)
+- 修复 iOS 推送暂停及 LiveActivity 回调注册时的类型转换异常。
+- 新增Java/Swift混编，要求HBuilderX 4.25及以上；uni-app/uni-app-x仍要求4.75及以上。
 - Android新增多channel订阅、UPS结果和显式crash handler；cmd2013保型、VoIP状态整数透出。
 - iOS补齐LiveActivity token注册/解绑及诊断开关、UPS；Harmony新增真实Async查询/初始化和UPS，保留旧缓存签名。
 - 多调用与销毁代际隔离，新增接口平台限制和错误契约见SDK-6.3-upgrade.md。
 
-## 1.3.2 (2026-10-29)
-
-升级三端原生SDK并补齐公开接口与回调载荷，厂商通道同步正式6.3.0配套
+- 升级三端原生SDK并补齐公开接口与回调载荷，厂商通道同步正式6.3.0配套。
 
 ## 1.3.1（2026-07-29）
 Android/iOS JPush SDK 升级至 6.2.0、JCore SDK 升级至 5.5.0；Android 更新厂商通道并新增小米订阅消息接口 requestSubscribeChannel
