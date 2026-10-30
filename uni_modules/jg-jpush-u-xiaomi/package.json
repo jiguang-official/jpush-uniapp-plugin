@@ -1,11 +1,11 @@
 {
   "id": "jg-jpush-u-xiaomi",
   "displayName": "jg-jpush-u-xiaomi",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "jg-jpush-u-xiaomi",
   "keywords": [
     "jg-jpush-u-xiaomi"
-],
+  ],
   "repository": "https://github.com/jiguang-official/jpush-uniapp-plugin",
   "engines": {
     "HBuilderX": "^3.6.8",

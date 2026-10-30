@@ -1,3 +1,5 @@
+> 1.3.2 的三端版本、公开接口、生命周期与集成要求见 [SDK升级说明](uni_modules/jg-jpush-u/SDK-6.3-upgrade.md)。
+
 # jg-uniapp-demo
 
 # 手动下载复制

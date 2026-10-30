@@ -1,18 +1,18 @@
 {
-	"dependencies": [
-		"cn.jiguang.sdk.plugin:fcm:6.2.0"
-	],
-	"minSdkVersion": "21",
-	"project": {
-  		"plugins": [
-			"com.google.gms.google-services"
-  		],
-  		"dependencies": [
-			"com.google.gms:google-services:4.4.2"
-  		],
-		"repositories": [
-			"google()",
-			"mavenCentral()"
-		]
-	}
+  "dependencies": [
+    "cn.jiguang.sdk.plugin:fcm:6.3.0"
+  ],
+  "minSdkVersion": "21",
+  "project": {
+    "plugins": [
+      "com.google.gms.google-services"
+    ],
+    "dependencies": [
+      "com.google.gms:google-services:4.4.2"
+    ],
+    "repositories": [
+      "google()",
+      "mavenCentral()"
+    ]
+  }
 }

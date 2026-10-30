@@ -1,7 +1,7 @@
 
 
 /* 引入 interface.uts 文件中定义的变量 */
-import { EventCallBackParams } from '../interface.uts';
+import { PushServiceResult, LiveActivityResult, LiveActivityPushTokenParams, LiveActivityPushToStartTokenParams, EventCallBackParams } from '../interface.uts';
 
 /* 引入 unierror.uts 文件中定义的变量 */
 
@@ -25,6 +25,18 @@ const TAG = "JPUSH-uni-"
 let APP_KEY : string | undefined = undefined
 let MY_WANT_ARRAY : Want[] = []
 let IS_INIT : boolean = false
+let upgradeGeneration: number = 0
+let activeCallback: CallBackMsgUni | null = null
+let callbackIdentity: number = 0
+function bridgeError(generation: number, identity: number): void {
+  if (generation == upgradeGeneration && identity == callbackIdentity) activeCallback?.emitBridgeError()
+}
+function consume<T>(promise: Promise<T>): void {
+  const generation = upgradeGeneration
+  const identity = callbackIdentity
+  promise.catch(() => { bridgeError(generation,identity) })
+}
+export function clearUpgradeCallbacks(): void { upgradeGeneration += 1; callbackIdentity += 1; activeCallback?.dispose(); activeCallback = null }
 
 // 获取应用上下文
 function getContext() : common.ApplicationContext {
@@ -35,41 +47,31 @@ function getContext() : common.ApplicationContext {
 function handleSetClickWant(want : Want) : void {
 	// 如果已经初始化，直接调用setClickWant
 	if (IS_INIT && undefined !== APP_KEY) {
-		console.log(TAG, "handleSetClickWant: calling setClickWant")
 		// 冷启动点击通知场景传入 context，避免 SDK 内部 context 未初始化异常（v1.4.0）
-		JPushInterface.setClickWant(want, getContext());
+		consume(JPushInterface.setClickWant(want, getContext()));
 	} else {
 		// 如果还没有初始化，保存到数组
 		MY_WANT_ARRAY.push(want)
-		console.log(TAG, "handleSetClickWant: saved want to array, size:" + MY_WANT_ARRAY.length)
 	}
 }
 
 // 处理所有保存的 want
 function processSavedWants() : void {
 	if (MY_WANT_ARRAY.length > 0) {
-		console.log(TAG, "processSavedWants: processing " + MY_WANT_ARRAY.length + " saved wants")
 		MY_WANT_ARRAY.forEach((want) => {
-			console.log(TAG, "processSavedWants: calling setClickWant")
-			JPushInterface.setClickWant(want, getContext());
+			consume(JPushInterface.setClickWant(want, getContext()));
 		})
 		MY_WANT_ARRAY = []
 	}
 }
 
 UTSHarmony.onAppAbilityCreate((want : Want, launchParam : AbilityConstant.LaunchParam) => {
-	console.log(TAG, "onAppAbilityCreate")
-	console.log(TAG, "onAppAbilityCreate APP_KEY:"+JSON.stringify(APP_KEY))
-	console.log(TAG, "onAppAbilityCreate IS_INIT:"+IS_INIT)
 	
 	// 使用统一方法处理
 	handleSetClickWant(want)
 })
 
 UTSHarmony.onAppAbilityNewWant((want : Want, launchParam : AbilityConstant.LaunchParam) => {
-	console.log(TAG, "onAppAbilityNewWant")
-	console.log(TAG, "onAppAbilityNewWant APP_KEY:"+JSON.stringify(APP_KEY))
-	console.log(TAG, "onAppAbilityNewWant IS_INIT:"+IS_INIT)
 	
 	// 使用统一方法处理
 	handleSetClickWant(want)
@@ -78,24 +80,23 @@ UTSHarmony.onAppAbilityNewWant((want : Want, launchParam : AbilityConstant.Launc
 
 
 export function setEventCallBack(param : EventCallBackParams) : void {
-	console.log(TAG, "setEventCallBack");
-	JPushInterface.setCallBackMsg(new CallBackMsgUni(param));
+	callbackIdentity += 1
+	activeCallback?.dispose();
+	activeCallback = new CallBackMsgUni(param, () => { refreshCachedPushStopped() })
+	JPushInterface.setCallBackMsg(activeCallback!);
 }
 
 
 export const setDebug = function (b : boolean) : void {
-	console.log(TAG, "setDebug:" + b)
 	JPushInterface.setDebug(b)
 }
 
 // 设置长连接心跳周期
 export const setHeartbeatTime = function (heartbeatTime : number) : void {
-	console.log(TAG, "setHeartbeatTime:" + heartbeatTime)
 	JPushInterface.setHeartbeatTime(heartbeatTime)
 }
 
 export const setAppKey = function (appKey : string) {
-	console.log(TAG, "setAppKey")
 	JPushInterface.setAppKey(appKey)
 	APP_KEY = appKey
 	
@@ -110,47 +111,37 @@ export const setChannel = function (channel : string) {
 
 // 配置用户通知权限申请方式
 export const setUserRequestNotificationPermission = function (enable : boolean) : void {
-	console.log(TAG, "setUserRequestNotificationPermission:" + enable)
 	JPushInterface.setUserRequestNotificationPermission(getContext(), enable)
 }
 
 // 设置用户分群推送开关
 export const setSmartPushEnable = function (enable : boolean) : void {
-	console.log(TAG, "setSmartPushEnable:" + enable)
 	const context = getContext()
 	JPushInterface.setSmartPushEnable(context, enable)
 }
 
 // 设置用户洞察开关
 export const setDataInsightsEnable = function (enable : boolean) : void {
-	console.log(TAG, "setDataInsightsEnable:" + enable)
 	const context = getContext()
-	JPushInterface.setDataInsightsEnable(context, enable)
+	consume(JPushInterface.setDataInsightsEnable(context, enable))
 }
 
-export const init = function (context : common.UIAbilityContext | common.AbilityStageContext | undefined) {
-	if (undefined === context) {
-		context = UTSHarmony.getUIAbilityContext()
-	}
-	console.log(TAG, "init")
-	JPushInterface.init(context)
-	IS_INIT = true
-	refreshCachedRid()
-	refreshCachedPushStopped()
-
-	// 如果已经设置了APP_KEY，处理所有保存的want
-	if (undefined !== APP_KEY) {
-		processSavedWants()
-	}
+export function initAsync(context: common.UIAbilityContext | common.AbilityStageContext | undefined): Promise<void> {
+  const generation = upgradeGeneration
+  return JPushInterface.init(context ?? UTSHarmony.getUIAbilityContext()).then(() => {
+    if (generation != upgradeGeneration) throw new Error('BRIDGE_INVALIDATED')
+    IS_INIT = true
+    refreshCachedRid(); refreshCachedPushStopped()
+    if (APP_KEY != undefined) processSavedWants()
+  })
+}
+export const init = function(context: common.UIAbilityContext | common.AbilityStageContext | undefined): void {
+  consume(initAsync(context))
 }
 
 // 异步刷新 RID 缓存，注册成功的 onRegister 回调也会更新缓存（见 callback.uts）
 function refreshCachedRid() : void {
-	JPushInterface.getRegistrationId().then((rid : string) => {
-		if (rid.length > 0) {
-			setCachedRid(rid)
-		}
-	})
+	consume(getRegistrationIdAsync())
 }
 
 // v1.4.0 起底层 SDK 改为异步返回，这里通过缓存保持与 Android/iOS 一致的同步返回；
@@ -181,11 +172,7 @@ let CACHED_PUSH_STOPPED : boolean = false
 
 // 异步刷新推送停止状态缓存
 function refreshCachedPushStopped() : void {
-	JPushInterface.isPushStopped().then((stopped : boolean | undefined) => {
-		if (undefined !== stopped) {
-			CACHED_PUSH_STOPPED = stopped
-		}
-	})
+	consume(isPushStoppedAsync())
 }
 
 /**
@@ -199,13 +186,11 @@ export const isPushStopped = function () : boolean {
 
 // 查询后台实际推送状态，结果通过 onCommandResult 事件回调返回
 export const getPushStatus = function () : void {
-	console.log(TAG, "getPushStatus")
 	JPushInterface.getPushStatus();
 }
 
 // 设置应用上下文，适用于 init 之前需要提前传入 context 的场景
 export const setContext = function (context ?: common.ApplicationContext) : void {
-	console.log(TAG, "setContext")
 	JPushInterface.setContext(context ?? getContext())
 }
 
@@ -271,48 +256,41 @@ export const defaultMessageBackgroundData = function (data : pushCommon.PushPayl
 
 // 清除指定通知
 export const clearNotificationById = function (id : number) : void {
-	console.log(TAG, "clearNotificationById:" + id)
 	JPushInterface.clearNotification(id)
 }
 
 // 通过消息ID清除通知
 export const clearNotificationByMsgId = function (msgId : string) : void {
-	console.log(TAG, "clearNotificationByMsgId:" + msgId)
 	JPushInterface.clearNotificationByMsgId(msgId)
 }
 
 // 清除所有通知
 export const clearNotificationAll = function () : void {
-	console.log(TAG, "clearNotificationAll")
 	JPushInterface.clearNotificationAll()
 }
 
 // 上报自定义消息展示
 export const reportCustomDisplay = function (channel : number, msgId : string) : void {
-	console.log(TAG, "reportCustomDisplay channel:" + channel + " msgId:" + msgId)
 	JPushInterface.reportCustomDisplay(channel, msgId)
 }
 
 // 上报自定义消息点击
 export const reportCustomClick = function (channel : number, msgId : string) : void {
-	console.log(TAG, "reportCustomClick channel:" + channel + " msgId:" + msgId)
 	JPushInterface.reportCustomClick(channel, msgId)
 }
 
 // 上报通知展示
 export const reportNotificationDisplay = function (channel : number, msgId : string) : void {
-	console.log(TAG, "reportNotificationDisplay channel:" + channel + " msgId:" + msgId)
 	JPushInterface.reportNotificationDisplay(channel, msgId)
 }
 
 // 上报通知点击
 export const reportNotificationClick = function (channel : number, msgId : string) : void {
-	console.log(TAG, "reportNotificationClick channel:" + channel + " msgId:" + msgId)
 	JPushInterface.reportNotificationClick(channel, msgId)
 }
 
 export const setListWifi = function (enable : boolean) {
-	JCollectControl.setListWifi(getContext(), enable);
+	consume(JCollectControl.setListWifi(getContext(), enable));
 }
 
 export const setEnableAppTerminate = function (enable : boolean) {
@@ -321,3 +299,47 @@ export const setEnableAppTerminate = function (enable : boolean) {
 /**
  * 更多插件开发的信息详见：https://uniapp.dcloud.net.cn/plugin/uts-plugin.html
  */
+
+/** These queries return actual SDK results; legacy synchronous getters remain cached. */
+export function getRegistrationIdAsync(): Promise<string> {
+  const generation = upgradeGeneration
+  return JPushInterface.getRegistrationId().then((rid: string): string => {
+    if (generation != upgradeGeneration) throw new Error('BRIDGE_INVALIDATED')
+    if (rid.length > 0) setCachedRid(rid)
+    return rid
+  })
+}
+export function isPushStoppedAsync(): Promise<boolean> {
+  const generation = upgradeGeneration
+  return JPushInterface.isPushStopped().then((stopped: boolean | undefined): boolean => {
+    if (generation != upgradeGeneration) throw new Error('BRIDGE_INVALIDATED')
+    if (stopped == undefined) throw new Error('STATUS_UNAVAILABLE')
+    CACHED_PUSH_STOPPED = stopped
+    return stopped
+  })
+}
+export function turnOffPush(): Promise<PushServiceResult> {
+  const generation = upgradeGeneration
+  const identity = callbackIdentity
+  return JPushInterface.turnOffPush(UTSHarmony.getUIAbilityContext()).then((result): Promise<PushServiceResult> => {
+    if (generation != upgradeGeneration) throw new Error('BRIDGE_INVALIDATED')
+    return isPushStoppedAsync().catch(() => {
+      if (generation != upgradeGeneration) throw new Error('BRIDGE_INVALIDATED')
+      bridgeError(generation,identity)
+    }).then((): PushServiceResult => {
+      if (generation != upgradeGeneration) throw new Error('BRIDGE_INVALIDATED')
+      return {code:result.code,msg:result.msg}
+    })
+  })
+}
+export function turnOnPush(): Promise<PushServiceResult> {
+  JPushInterface.turnOnPush(UTSHarmony.getUIAbilityContext())
+  refreshCachedPushStopped()
+  return Promise.resolve({dispatched:true} as PushServiceResult)
+}
+export function requestSubscribeChannels(channels: string[]): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function initCrashHandler(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function stopCrashHandler(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function setLiveActivityTokenReportEnabled(enable: boolean): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function registerLiveActivityPushToken(params: LiveActivityPushTokenParams): Promise<LiveActivityResult> { return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function registerLiveActivityPushToStartToken(params: LiveActivityPushToStartTokenParams): Promise<LiveActivityResult> { return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }

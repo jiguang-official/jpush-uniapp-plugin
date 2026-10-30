@@ -1,19 +1,19 @@
 {
-	"dependencies": [
-		"cn.jiguang.sdk.plugin:huawei:6.2.0"
-	],
-	"minSdkVersion": "21",
-	"project": {
-  		"plugins": [
-			"com.huawei.agconnect"
-  		],
-  		"dependencies": [
-			"com.huawei.agconnect:agcp:1.9.1.301"
-  		],
-		"repositories": [
-			"google()",
-			"mavenCentral()",
-			"maven { url 'https://developer.huawei.com/repo/' }"
-		]
-	}
+  "dependencies": [
+    "cn.jiguang.sdk.plugin:huawei:6.3.0"
+  ],
+  "minSdkVersion": "21",
+  "project": {
+    "plugins": [
+      "com.huawei.agconnect"
+    ],
+    "dependencies": [
+      "com.huawei.agconnect:agcp:1.9.1.301"
+    ],
+    "repositories": [
+      "google()",
+      "mavenCentral()",
+      "maven { url 'https://developer.huawei.com/repo/' }"
+    ]
+  }
 }

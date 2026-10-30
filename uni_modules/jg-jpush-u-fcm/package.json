@@ -1,11 +1,11 @@
 {
   "id": "jg-jpush-u-fcm",
   "displayName": "jg-jpush-u-fcm",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "jg-jpush-u-fcm",
   "keywords": [
     "jg-jpush-u-fcm"
-],
+  ],
   "repository": "https://github.com/jiguang-official/jpush-uniapp-plugin",
   "engines": {
     "HBuilderX": "^3.6.8",

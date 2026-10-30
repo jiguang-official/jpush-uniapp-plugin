@@ -1,9 +1,8 @@
-import { Data } from 'Assignables';
-import { App } from 'MarketplaceKit';
+import { Data } from 'Foundation';
 import { Notification } from 'Foundation';
-import { NSNotification } from 'CoreFoundation';
+import { NSNotification } from 'Foundation';
 
-import { Dictionary, Set, Error } from 'Swift';
+import { Dictionary, Set } from 'Swift';
 import { NSError } from 'Foundation';
 import { NSSet } from 'Foundation';
 import { UIDevice, UIApplication } from 'UIKit';
@@ -617,3 +616,100 @@ export function getBadgeNumber() : number {
 	return Number(badgeNumber)
 }
 
+
+
+import { DispatchQueue } from 'Dispatch'
+import { PushServiceResult, LiveActivityResult, LiveActivityPushTokenParams, LiveActivityPushToStartTokenParams } from '../interface.uts'
+type IOSPushReply = { generation: number, resolve: (value: PushServiceResult) => void, reject: (error: Error) => void }
+type IOSTokenReply = { generation: number, resolve: (value: LiveActivityResult) => void, reject: (error: Error) => void }
+const iosPushReplies = new Map<number, IOSPushReply>()
+const iosTokenReplies = new Map<number, IOSTokenReply>()
+let iosRequestSequence: number = 0
+export function clearUpgradeCallbacks(): void {
+  JPushUpgradeCodec.invalidate()
+  DispatchQueue.main.async(execute = () => {
+    const current = Number.from(JPushUpgradeCodec.generation())
+    const expiredPush = new Array<number>()
+    const expiredToken = new Array<number>()
+    iosPushReplies.forEach((reply, id) => { if (reply.generation != current) expiredPush.push(id) })
+    iosTokenReplies.forEach((reply, id) => { if (reply.generation != current) expiredToken.push(id) })
+    for (const id of expiredPush) { iosPushReplies.delete(id) }
+    for (const id of expiredToken) { iosTokenReplies.delete(id) }
+  })
+}
+function finishIOSPush(id: number, result: PushServiceResult): void {
+  DispatchQueue.main.async(execute = () => {
+    const pending = iosPushReplies.get(id)
+    if (pending == null) return
+    iosPushReplies.delete(id)
+    if (pending.generation == Number.from(JPushUpgradeCodec.generation())) pending.resolve(result)
+  })
+}
+export function turnOffPush(): Promise<PushServiceResult> {
+  const generation = Number.from(JPushUpgradeCodec.generation())
+  return new Promise<PushServiceResult>((resolve,reject) => {
+    DispatchQueue.main.async(execute = () => {
+      if (generation != Number.from(JPushUpgradeCodec.generation())) { reject(new Error('BRIDGE_INVALIDATED')); return }
+      iosRequestSequence += 1
+      const id = iosRequestSequence
+      // 显式适配 Error 回调，避免 Swift 将 Promise 的宽类型 reject 强转为窄类型函数。
+      iosPushReplies.set(id, {generation:generation,resolve:resolve,reject:(error: Error) => { reject(error) }})
+      JPUSHService.turnOffPush((code: Int) => { finishIOSPush(id, {code:Number.from(code)}) })
+    })
+  })
+}
+export function turnOnPush(): Promise<PushServiceResult> {
+  const generation = Number.from(JPushUpgradeCodec.generation())
+  return new Promise<PushServiceResult>((resolve,reject) => {
+    DispatchQueue.main.async(execute = () => { if (generation != Number.from(JPushUpgradeCodec.generation())) { reject(new Error('BRIDGE_INVALIDATED')); return }; JPUSHService.turnOnPush(); resolve({dispatched:true}) })
+  })
+}
+export function setLiveActivityTokenReportEnabled(enable: boolean): Promise<void> {
+  const generation = Number.from(JPushUpgradeCodec.generation())
+  return new Promise<void>((resolve,reject) => {
+    DispatchQueue.main.async(execute = () => { if (generation != Number.from(JPushUpgradeCodec.generation())) { reject(new Error('BRIDGE_INVALIDATED')); return }; JPUSHService.setLiveActivityTokenReportEnabled(enable); resolve() })
+  })
+}
+function registerLiveToken(identifier: string, token: string | null, sequence: number, start: boolean): Promise<LiveActivityResult> {
+  if (!JPushUpgradeCodec.validIdentifier(identifier) || !JPushUpgradeCodec.validToken(token) || !JPushUpgradeCodec.validSequence(sequence)) {
+    return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('INVALID_ARGUMENT')) })
+  }
+  if (start) {
+    if (UTSiOS.available("iOS 17.2, *")) { } else { return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('UNSUPPORTED_OS')) }) }
+  } else {
+    if (UTSiOS.available("iOS 16.1, *")) { } else { return new Promise<LiveActivityResult>((resolve,reject) => { reject(new Error('UNSUPPORTED_OS')) }) }
+  }
+  const generation = Number.from(JPushUpgradeCodec.generation())
+  return new Promise<LiveActivityResult>((resolve,reject) => {
+    DispatchQueue.main.async(execute = () => {
+      if (generation != Number.from(JPushUpgradeCodec.generation())) { reject(new Error('BRIDGE_INVALIDATED')); return }
+      iosRequestSequence += 1
+      const id = iosRequestSequence
+      iosTokenReplies.set(id, {generation:generation,resolve:resolve,reject:(error: Error) => { reject(error) }})
+      const completion = (code: Int, activityId: string | null, resultToken: Data | null, seq: Int) => {
+        DispatchQueue.main.async(execute = () => {
+          const pending = iosTokenReplies.get(id)
+          if (pending == null) return
+          iosTokenReplies.delete(id)
+          if (pending.generation != Number.from(JPushUpgradeCodec.generation())) return
+          pending.resolve({code:Number.from(code), activityId:activityId, token:JPushUpgradeCodec.encode(resultToken), sequence:Number.from(seq)})
+        })
+      }
+      if (start) JPUSHService.registerLiveActivity(identifier, pushToStartToken=JPushUpgradeCodec.decode(token), completion=completion, seq=Int(sequence))
+      else JPUSHService.registerLiveActivity(identifier, pushToken=JPushUpgradeCodec.decode(token), completion=completion, seq=Int(sequence))
+    })
+  })
+}
+export function registerLiveActivityPushToken(params: LiveActivityPushTokenParams): Promise<LiveActivityResult> {
+  return registerLiveToken(params.activityId,params.token,params.sequence,false)
+}
+export function registerLiveActivityPushToStartToken(params: LiveActivityPushToStartTokenParams): Promise<LiveActivityResult> {
+  return registerLiveToken(params.activityAttributes,params.token,params.sequence,true)
+}
+export function getRegistrationIdAsync(): Promise<string> { return Promise.resolve(getRegistrationId()) }
+export function isPushStoppedAsync(): Promise<boolean> { return new Promise<boolean>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function requestSubscribeChannels(channels: string[]): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function initCrashHandler(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+export function stopCrashHandler(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }
+
+export function initAsync(): Promise<void> { return new Promise<void>((resolve,reject) => { reject(new Error('UNSUPPORTED_PLATFORM')) }) }

@@ -31,3 +31,15 @@ export type EventCallBackParams = {
 
 // /* 同步函数定义 */
 // export type MyApiSync = (paramA : boolean) => MyApiResult
+
+export type PushServiceResult = { code?: number, msg?: string, dispatched?: boolean }
+export type LiveActivityPushTokenParams = { activityId: string, token: string | null, sequence: number }
+export type LiveActivityPushToStartTokenParams = { activityAttributes: string, token: string | null, sequence: number }
+export type LiveActivityResult = { code: number, activityId: string | null, token: string | null, sequence: number }
+export type RequestSubscribeChannels = (channels: string[]) => Promise<void>
+export type TurnOffPush = () => Promise<PushServiceResult>
+export type TurnOnPush = () => Promise<PushServiceResult>
+export type CrashHandlerControl = () => Promise<void>
+export type LiveActivityTokenReportControl = (enable: boolean) => Promise<void>
+export type RegisterLiveActivityPushToken = (params: LiveActivityPushTokenParams) => Promise<LiveActivityResult>
+export type RegisterLiveActivityPushToStartToken = (params: LiveActivityPushToStartTokenParams) => Promise<LiveActivityResult>

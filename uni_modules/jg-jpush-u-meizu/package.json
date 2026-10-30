@@ -1,11 +1,11 @@
 {
   "id": "jg-jpush-u-meizu",
   "displayName": "jg-jpush-u-meizu",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "jg-jpush-u-meizu",
   "keywords": [
     "jg-jpush-u-meizu"
-],
+  ],
   "repository": "https://github.com/jiguang-official/jpush-uniapp-plugin",
   "engines": {
     "HBuilderX": "^3.6.8",

@@ -1,0 +1,1 @@
+{"name":"jpush-uniapp-upgrade-contract-tests","private":true,"scripts":{"test":"node --test harmony-upgrade.test.cjs"},"devDependencies":{"typescript":"5.0.4"}}
