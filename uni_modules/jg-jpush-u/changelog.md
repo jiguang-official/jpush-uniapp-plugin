@@ -1,3 +1,8 @@
+## 1.3.3（2026-11-27）
+
+- iOS 新增 `setForegroundNotificationEnable` 与 `setForegroundNotificationOptions`，支持关闭前台通知展示或分别控制横幅、声音和角标。
+- 关闭前台展示后，App 仍会收到前台通知回调。后台及 App 进程结束后的普通 APNs 通知仍由系统展示。
+
 ## 1.3.2
 - 修复 iOS 推送暂停及 LiveActivity 回调注册时的类型转换异常。
 - 新增Java/Swift混编，要求HBuilderX 4.25及以上；uni-app/uni-app-x仍要求4.75及以上。
