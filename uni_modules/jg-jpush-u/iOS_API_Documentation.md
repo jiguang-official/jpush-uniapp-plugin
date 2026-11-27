@@ -65,6 +65,28 @@ setEventCallBack({
 })
 ```
 
+#### setForegroundNotificationEnable(isEnable: boolean)
+
+设置 iOS App 在前台收到通知时是否展示。传 `false` 时关闭横幅、声音和角标，传 `true` 时恢复默认的展示选项。前台仍会触发 `onNotifyMessageArrived`，后台或应用被杀后的普通 APNs 通知仍由系统展示。
+
+设置在当前进程中生效。需要一直关闭时，请在每次冷启动初始化推送时调用。
+
+```uts
+import { setForegroundNotificationEnable } from '@/uni_modules/jg-jpush-u'
+
+setForegroundNotificationEnable(false)
+```
+
+#### setForegroundNotificationOptions(options: ForegroundNotificationOptions)
+
+分别设置 iOS 前台通知的横幅（`alert`）、声音（`sound`）和角标（`badge`）。每次调用会更新全部选项，省略的字段按 `false` 处理。以下示例只允许更新角标。
+
+```uts
+import { setForegroundNotificationOptions } from '@/uni_modules/jg-jpush-u'
+
+setForegroundNotificationOptions({ badge: true })
+```
+
 ### 2. 设备标识管理
 
 #### getRegistrationId(): string

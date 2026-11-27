@@ -1,6 +1,7 @@
 import { Data } from 'Foundation';
 import { Notification } from 'Foundation';
 import { NSNotification } from 'Foundation';
+import { NSLock } from 'Foundation';
 
 import { Dictionary, Set } from 'Swift';
 import { NSError } from 'Foundation';
@@ -13,7 +14,7 @@ import { Selector, NSString } from 'Foundation';
 import { UNUserNotificationCenter } from 'UserNotifications';
 
 /* 引入 interface.uts 文件中定义的变量 */
-import { EventCallBackParams, EventCallBack } from '../interface.uts';
+import { EventCallBackParams, EventCallBack, ForegroundNotificationOptions } from '../interface.uts';
 
 const TAG = "| JIGUANG | JPUSH-uni-"
 
@@ -153,12 +154,31 @@ export class JGPushIOSPlugin implements UTSiOSHookProxy {
 	}
 }
 
+const defaultForegroundPresentationOptions = Int(UNNotificationPresentationOptions.alert.rawValue) |
+	Int(UNNotificationPresentationOptions.sound.rawValue) | Int(UNNotificationPresentationOptions.badge.rawValue)
+
 /**
  * 极光推送模块实现
  */
 class JGPushModule implements JPUSHRegisterDelegate {
 
 	launchOptions : Map<UIApplication.LaunchOptionsKey, any> | null = null
+	// JS 接口和系统通知回调可以从不同线程访问展示选项。
+	private foregroundOptionsLock : NSLock = new NSLock()
+	private foregroundPresentationOptions : Int = defaultForegroundPresentationOptions
+
+	setForegroundPresentationOptions(value : Int) : void {
+		this.foregroundOptionsLock.lock()
+		this.foregroundPresentationOptions = value
+		this.foregroundOptionsLock.unlock()
+	}
+
+	getForegroundPresentationOptions() : Int {
+		this.foregroundOptionsLock.lock()
+		const value = this.foregroundPresentationOptions
+		this.foregroundOptionsLock.unlock()
+		return value
+	}
 
 	/**
 	 * 初始化极光推送
@@ -248,7 +268,7 @@ class JGPushModule implements JPUSHRegisterDelegate {
 		const jsonString = JSON.stringify(u)
 		eventCallbackManager.triggerEvent("onNotifyMessageArrived", jsonString!)
 
-		completionHandler(Int(UNNotificationPresentationOptions.alert.rawValue) | Int(UNNotificationPresentationOptions.sound.rawValue) | Int(UNNotificationPresentationOptions.badge.rawValue))
+		completionHandler(this.getForegroundPresentationOptions())
 	}
 
 	/**
@@ -337,6 +357,26 @@ export function setBackgroundEnable(isEnable : boolean) : void {
 	} else {
 		JPUSHService.setBackgroundEnable(false)
 	}
+}
+
+/** 设置 iOS 前台收到通知时的横幅、声音和角标。 */
+export function setForegroundNotificationOptions(options : ForegroundNotificationOptions) : void {
+	let value : Int = 0
+	if (options.alert) {
+		value = value | Int(UNNotificationPresentationOptions.alert.rawValue)
+	}
+	if (options.sound) {
+		value = value | Int(UNNotificationPresentationOptions.sound.rawValue)
+	}
+	if (options.badge) {
+		value = value | Int(UNNotificationPresentationOptions.badge.rawValue)
+	}
+	JGPushTool.setForegroundPresentationOptions(value)
+}
+
+/** 关闭前台展示，或恢复默认的横幅、声音和角标。 */
+export function setForegroundNotificationEnable(isEnable : boolean) : void {
+	JGPushTool.setForegroundPresentationOptions(isEnable ? defaultForegroundPresentationOptions : 0)
 }
 
 /**

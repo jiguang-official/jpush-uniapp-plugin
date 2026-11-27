@@ -12,6 +12,16 @@ export type EventCallBackParams = {
 	callback?: (res: EventCallBack) => void
 }
 
+/** iOS 前台通知展示选项。省略的选项按 false 处理。 */
+export type ForegroundNotificationOptions = {
+	alert?: boolean
+	sound?: boolean
+	badge?: boolean
+}
+
+export type SetForegroundNotificationOptions = (options: ForegroundNotificationOptions) => void
+export type SetForegroundNotificationEnable = (isEnable: boolean) => void
+
 // /**
 //  * 错误码
 //  * 根据uni错误码规范要求，建议错误码以90开头，以下是错误码示例：
